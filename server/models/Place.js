@@ -20,22 +20,16 @@ const PlaceSchema = new mongoose.Schema({
   },
   addedBy: {
     type: mongoose.Schema.ObjectId,
-    required: true,
+    // required: true,
     ref: 'Account',
   },
   link: {
-    maps: {
-      type: String,
-    },
-    yelp: {
-      type: String,
-    },
+    maps: String,
+    yelp: String,
   },
   reccomendedBy: {
-    name: {
-      type: String,
-    },
-    id: {
+    name: String,
+    _id: {
       type: mongoose.Schema.ObjectId,
       ref: 'Account',
     },
@@ -44,22 +38,22 @@ const PlaceSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  notes: {
-    type: String,
-  },
+  notes: String
 });
 
-// DomoSchema.statics.toAPI = (doc) => ({
-//   name: doc.name,
-//   age: doc.age,
-// });
+PlaceSchema.statics.toAPI = (doc) => ({
+  name: doc.name,
+  link: {
+    maps: doc.link.maps
+  }
+});
 //
-DomoSchema.statics.findByOwner = (ownerId, callback) => {
-  const search = {
-    owner: convertId(ownerId),
-  };
-  return DomoModel.find(search).select('name age').lean().exec(callback);
-};
+// DomoSchema.statics.findByOwner = (ownerId, callback) => {
+//   const search = {
+//     owner: convertId(ownerId),
+//   };
+//   return DomoModel.find(search).select('name addedBy notes').lean().exec(callback);
+// };
 
 PlaceModel = mongoose.model('Place', PlaceSchema);
 
