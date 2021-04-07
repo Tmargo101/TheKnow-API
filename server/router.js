@@ -7,6 +7,7 @@ const router = (app) => {
   app.post('/signup', controllers.Account.signup);
   app.post('/places', controllers.Place.addPlace);
   app.get('/places/:id', controllers.Place.getPlace);
+  app.post('/collection', controllers.Collection.addCollection);
 };
 
 module.exports = router;

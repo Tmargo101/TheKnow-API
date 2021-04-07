@@ -47,13 +47,13 @@ PlaceSchema.statics.toAPI = (doc) => ({
     maps: doc.link.maps
   }
 });
-//
-// DomoSchema.statics.findByOwner = (ownerId, callback) => {
-//   const search = {
-//     owner: convertId(ownerId),
-//   };
-//   return DomoModel.find(search).select('name addedBy notes').lean().exec(callback);
-// };
+
+PlaceSchema.statics.findByOwner = (ownerId, callback) => {
+  const search = {
+    owner: convertId(ownerId),
+  };
+  return PlaceModel.find(search).select('_id name addedBy notes').lean().exec(callback);
+};
 
 PlaceModel = mongoose.model('Place', PlaceSchema);
 
