@@ -27,18 +27,18 @@ const CollectionSchema = new mongoose.Schema({
     {
       memberId: {
         type: mongoose.Schema.ObjectId,
-        ref: 'Account'
-      }
-    }
+        ref: 'Account',
+      },
+    },
   ],
   places: {
     type: Array,
-    required: true
+    required: true,
   },
   createdDate: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 CollectionSchema.statics.toAPI = (doc) => ({
@@ -47,7 +47,6 @@ CollectionSchema.statics.toAPI = (doc) => ({
   owner: doc.owner,
   places: doc.places,
 });
-
 
 CollectionSchema.statics.findByOwner = (ownerId, callback) => {
   const search = {

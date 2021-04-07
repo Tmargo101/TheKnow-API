@@ -38,14 +38,14 @@ const PlaceSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  notes: String
+  notes: String,
 });
 
 PlaceSchema.statics.toAPI = (doc) => ({
   name: doc.name,
   link: {
-    maps: doc.link.maps
-  }
+    maps: doc.link.maps,
+  },
 });
 
 PlaceSchema.statics.findByOwner = (ownerId, callback) => {
