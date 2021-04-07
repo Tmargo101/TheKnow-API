@@ -46,20 +46,17 @@ const signup = (request, response) => {
 
     const newAccount = new Account.AccountModel(accountData);
 
-    const savePromise = newAccount.save();
-
-    savePromise.then(() => {
-      request.session.account = Account.AccountModel.toAPI(newAccount);
-      return response.json({ redirect: '/maker' });
-    });
-
-    savePromise.catch((err) => {
-      console.log(err);
-      if (err.code === 11000) {
-        return response.status(400).json({ error: 'Username already in use' });
-      }
-      return response.status(400).json({ error: 'An error occurred' });
-    });
+    newAccount.save()
+      .then(() => {
+        request.session.account = Account.AccountModel.toAPI(newAccount);
+        return response.json({ redirect: '/maker' });
+      }).catch((err) => {
+        console.log(err);
+        if (err.code === 11000) {
+          return response.status(400).json({ error: 'Username already in use' });
+        }
+        return response.status(400).json({ error: 'An error occurred' });
+      });
   });
 };
 
