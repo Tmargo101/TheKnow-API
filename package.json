@@ -10,8 +10,10 @@
   "scripts": {
     "pretest": "eslint ./server --fix",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./server/app.js",
-    "nodemon": "nodemon --watch ./server ./server/app.js"
+    "start": "npm run build && node ./dist/app.js",
+    "nodemon": "nodemon --watch ./server ./server/app.js",
+    "babelmon": "nodemon --exec babel-node src/app.js",
+    "build": "babel src -d dist"
   },
   "keywords": [
     "Node",
@@ -42,6 +44,11 @@
     "underscore": "^1.12.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.13.16",
+    "@babel/core": "^7.13.16",
+    "@babel/node": "^7.13.13",
+    "@babel/plugin-transform-runtime": "^7.13.15",
+    "@babel/preset-env": "^7.13.15",
     "eslint": "^7.23.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-base": "^14.2.1",
