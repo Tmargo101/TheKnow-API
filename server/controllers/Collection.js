@@ -13,7 +13,7 @@ const addCollection = async (request, response) => {
   });
   await newCollection.save();
   response.json({
-    success: 'saved',
+    status: 'saved',
     object: newCollection,
   });
 };
@@ -22,7 +22,22 @@ const getCollection = async (request, response, id) => {
   response.json({ id });
 };
 
+const getAllCollections = async (request, response, id) => {
+  response.json({ id });
+};
+
+const updateCollection = async (request, response, id) => {
+  response.json({ id });
+};
+
+const removeCollection = async (request, response, id) => {
+  response.json({ id });
+};
+
 module.exports = {
   addCollection,
   getCollection,
+  getAllCollections,
+  updateCollection,
+  removeCollection,
 };
