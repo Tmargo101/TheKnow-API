@@ -1,8 +1,6 @@
-const models = require('../models');
+import { Collection } from '../models';
 
-const { Collection } = models;
-
-const addCollection = async (request, response) => {
+export const addCollection = async (request, response) => {
   if (!request.body.name || !request.body.owner) {
     response.send('Not all params');
     return;
@@ -18,26 +16,18 @@ const addCollection = async (request, response) => {
   });
 };
 
-const getCollection = async (request, response, id) => {
+export const getCollection = async (request, response, id) => {
   response.json({ id });
 };
 
-const getAllCollections = async (request, response, id) => {
+export const getAllCollections = async (request, response, id) => {
   response.json({ id });
 };
 
-const updateCollection = async (request, response, id) => {
+export const updateCollection = async (request, response, id) => {
   response.json({ id });
 };
 
-const removeCollection = async (request, response, id) => {
+export const removeCollection = async (request, response, id) => {
   response.json({ id });
-};
-
-module.exports = {
-  addCollection,
-  getCollection,
-  getAllCollections,
-  updateCollection,
-  removeCollection,
 };

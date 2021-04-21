@@ -1,13 +1,11 @@
-const models = require('../models');
+import { Account } from '../models';
 
-const { Account } = models;
-
-const logout = (request, response) => {
+export const logout = (request, response) => {
   request.session.destroy();
   response.redirect('/');
 };
 
-const login = (request, response) => {
+export const login = (request, response) => {
   const username = `${request.body.username}`;
   const password = `${request.body.pass}`;
 
@@ -24,7 +22,7 @@ const login = (request, response) => {
   });
 };
 
-const signup = (request, response) => {
+export const signup = (request, response) => {
   request.body.username = `${request.body.username}`;
   request.body.pass = `${request.body.pass}`;
   request.body.pass2 = `${request.body.pass2}`;
@@ -58,10 +56,4 @@ const signup = (request, response) => {
         return response.status(400).json({ error: 'An error occurred' });
       });
   });
-};
-
-module.exports = {
-  login,
-  logout,
-  signup,
 };

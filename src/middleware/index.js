@@ -1,12 +1,12 @@
 // Ensure a session for the user exists before completing their request
-const requiresLogin = (request, response, next) => {
+export const requiresLogin = (request, response, next) => {
   if (!request.session.account) {
     return response.redirect('/');
   }
   return next();
 };
 
-const requiresLogout = (request, response, next) => {
+export const requiresLogout = (request, response, next) => {
   if (request.session.account) {
     return response.redirect('/');
   }
@@ -25,12 +25,6 @@ const requiresSecure = (request, response, next) => {
 // Bypass https security for non-production environments
 const bypassSecure = (request, response, next) => {
   next();
-};
-
-// Export functions
-module.exports = {
-  requiresLogin,
-  requiresLogout,
 };
 
 // Use HTTPS or bypass based on NODE_ENV variable

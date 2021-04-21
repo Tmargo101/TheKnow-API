@@ -1,33 +1,40 @@
-const controllers = require('./controllers');
+// import {
+//   Home, Account, Collection, Place,
+// } from './controllers';
+
+import * as Home from './controllers/home';
+import * as Account from './controllers/Account';
+import * as Collection from './controllers/Collection';
+import * as Place from './controllers/Place';
 
 const router = (app) => {
   // API Base
-  app.get('/', controllers.Home.home);
+  app.get('/', Home.home);
 
   // Authentication functions
-  app.get('/logout', controllers.Account.logout);
-  app.post('/login', controllers.Account.login);
-  app.post('/signup', controllers.Account.signup);
+  app.get('/logout', Account.logout);
+  app.post('/login', Account.login);
+  app.post('/signup', Account.signup);
 
   // Collection routes
-  app.get('/collections', controllers.Collection.getAllCollections);
-  app.get('/collections/:id', controllers.Collection.getCollection);
-  app.post('/collections', controllers.Collection.addCollection);
-  app.put('/collections/:id', controllers.Collection.updateCollection);
-  app.delete('/collections/:id', controllers.Collection.removeCollection);
+  app.get('/collections', Collection.getAllCollections);
+  app.get('/collections/:id', Collection.getCollection);
+  app.post('/collections', Collection.addCollection);
+  app.put('/collections/:id', Collection.updateCollection);
+  app.delete('/collections/:id', Collection.removeCollection);
 
   // Place routes
-  app.get('/places', controllers.Place.getAllPlaces);
-  app.get('/places/:id', controllers.Place.getPlace);
-  app.post('/places', controllers.Place.addPlace);
-  app.put('/places/:id', controllers.Place.updatePlace);
-  app.delete('/places/:id', controllers.Place.removePlace);
+  app.get('/places', Place.getAllPlaces);
+  app.get('/places/:id', Place.getPlace);
+  app.post('/places', Place.addPlace);
+  app.put('/places/:id', Place.updatePlace);
+  app.delete('/places/:id', Place.removePlace);
 
   // Fallback routes
-  app.get('*', controllers.Home.notFound);
-  app.post('*', controllers.Home.notFound);
-  app.put('*', controllers.Home.notFound);
-  app.delete('*', controllers.Home.notFound);
+  app.get('*', Home.notFound);
+  app.post('*', Home.notFound);
+  app.put('*', Home.notFound);
+  app.delete('*', Home.notFound);
 };
 
-module.exports = router;
+export default router;

@@ -1,14 +1,15 @@
 // const path = require('path');
-const express = require('express');
-const compression = require('compression');
+import express from 'express';
+import compression from 'compression';
 // const favicon = require('serve-favicon');
 // const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const session = require('express-session');
+import { urlencoded } from 'body-parser';
+import { connect } from 'mongoose';
+import session from 'express-session';
+import { createClient } from 'redis';
+import router from './router';
+
 const RedisStore = require('connect-redis')(session);
-const redis = require('redis');
-const router = require('./router.js');
 
 // Start express
 const app = express();
@@ -44,12 +45,12 @@ if (process.env.REDISCLOUD_URL && process.env.REDISCLOUD_PORT && process.env.RED
 }
 
 // Connect to the MongoDB Database
-mongoose.connect(dbURL, mongooseOptions, (err) => {
+connect(dbURL, mongooseOptions, (err) => {
   if (err) throw err;
 });
 
 // Connect to the Redis Database
-const redisClient = redis.createClient({
+const redisClient = createClient({
   host: redisCredentials.hostname,
   port: redisCredentials.port,
   password: redisCredentials.pass,
@@ -59,7 +60,7 @@ const redisClient = redis.createClient({
 
 // Use the compression library with express
 app.use(compression());
-app.use(bodyParser.urlencoded({
+app.use(urlencoded({
   extended: true,
 }));
 

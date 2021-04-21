@@ -1,6 +1,4 @@
-const models = require('../models');
-
-const { Place, Collection } = models;
+import { Place, Collection } from '../models';
 
 // Ensure all needed params are present before creating a new place.
 // If any params are not present, respond with an error message
@@ -40,7 +38,7 @@ const createNewPlaceObject = (request) => {
   return newPlace;
 };
 
-const addPlace = async (request, response) => {
+export const addPlace = async (request, response) => {
   validateNewPlace(request, response);
 
   try {
@@ -62,26 +60,18 @@ const addPlace = async (request, response) => {
   }
 };
 
-const getPlace = async (request, response, id) => {
+export const getPlace = async (request, response, id) => {
   response.json({ id });
 };
 
-const getAllPlaces = async (request, response, id) => {
+export const getAllPlaces = async (request, response, id) => {
   response.json({ id });
 };
 
-const updatePlace = async (request, response, id) => {
+export const updatePlace = async (request, response, id) => {
   response.json({ id });
 };
 
-const removePlace = async (request, response, id) => {
+export const removePlace = async (request, response, id) => {
   response.json({ id });
-};
-
-module.exports = {
-  addPlace,
-  getPlace,
-  getAllPlaces,
-  updatePlace,
-  removePlace,
 };
