@@ -1,17 +1,17 @@
-const mongoose = require('mongoose');
-const _ = require('underscore');
+import { Types, Schema, model } from 'mongoose';
+import { escape } from 'underscore';
 
 // mongoose.Promise = global.Promise;
 
 let CollectionModel = {};
 
 // Converts a string of an ID to a mongoose ID
-const convertId = mongoose.Types.ObjectId;
+const convertId = Types.ObjectId;
 
 // Converts
-const setName = (name) => _.escape(name).trim();
+const setName = (name) => escape(name).trim();
 
-const CollectionSchema = new mongoose.Schema({
+const CollectionSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -19,14 +19,14 @@ const CollectionSchema = new mongoose.Schema({
     set: setName,
   },
   owner: {
-    type: mongoose.Schema.ObjectId,
+    type: Schema.ObjectId,
     required: true,
     ref: 'Account',
   },
   members: [
     {
       memberId: {
-        type: mongoose.Schema.ObjectId,
+        type: Schema.ObjectId,
         ref: 'Account',
       },
     },
@@ -55,9 +55,9 @@ CollectionSchema.statics.findByOwner = (ownerId, callback) => {
   return CollectionSchema.find(search).select('_id name owner places').lean().exec(callback);
 };
 
-CollectionModel = mongoose.model('Collection', CollectionSchema);
+CollectionModel = model('Collection', CollectionSchema);
 
-module.exports = {
+export {
   CollectionModel,
   CollectionSchema,
 };

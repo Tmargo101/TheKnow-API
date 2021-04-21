@@ -1,11 +1,11 @@
-import { Account } from '../models';
+import * as Account from '../models/Account';
 
 export const logout = (request, response) => {
   request.session.destroy();
   response.redirect('/');
 };
 
-export const login = (request, response) => {
+export const login = async (request, response) => {
   const username = `${request.body.username}`;
   const password = `${request.body.pass}`;
 
@@ -13,47 +13,47 @@ export const login = (request, response) => {
     return response.status(400).json({ error: 'All fields are requred' });
   }
 
-  return Account.AccountModel.authenticate(username, password, (err, account) => {
-    if (err || !account) {
-      return response.status(401).json({ error: 'Wrong username or password' });
-    }
-    request.session.account = Account.AccountModel.toAPI(account);
-    return response.json({ redirect: '/maker' });
-  });
+  const account = await Account.AccountModel.authenticate(username, password);
+
+  if (account === null) {
+    return response.status(401).json({ error: 'Wrong username or password' });
+  }
+  request.session.account = Account.AccountModel.toAPI(account);
+  return response.json({ redirect: '/maker' });
 };
 
-export const signup = (request, response) => {
-  request.body.username = `${request.body.username}`;
-  request.body.pass = `${request.body.pass}`;
-  request.body.pass2 = `${request.body.pass2}`;
+export const signup = async (request, response) => {
+  const username = `${request.body.username}`;
+  const pass = `${request.body.pass}`;
+  const pass2 = `${request.body.pass2}`;
 
   if (!request.body.username || !request.body.pass || !request.body.pass2) {
     return response.status(400).json({ error: 'All fields are required' });
   }
 
-  if (request.body.pass !== request.body.pass2) {
+  if (pass !== pass2) {
     return response.status(400).json({ error: 'Passwords do not match' });
   }
 
-  return Account.AccountModel.generateHash(request.body.pass, (salt, hash) => {
-    const accountData = {
-      username: request.body.username,
-      salt,
-      password: hash,
-    };
+  const encryptedPassword = await Account.AccountModel.generateHash(pass);
 
-    const newAccount = new Account.AccountModel(accountData);
+  const accountData = {
+    username,
+    salt: encryptedPassword.salt,
+    password: encryptedPassword.hash,
+  };
 
-    newAccount.save()
-      .then(() => {
-        request.session.account = Account.AccountModel.toAPI(newAccount);
-        return response.json({ redirect: '/maker' });
-      }).catch((err) => {
-        console.log(err);
-        if (err.code === 11000) {
-          return response.status(400).json({ error: 'Username already in use' });
-        }
-        return response.status(400).json({ error: 'An error occurred' });
-      });
-  });
+  const newAccount = new Account.AccountModel(accountData);
+
+  try {
+    await newAccount.save();
+    request.session.account = Account.AccountModel.toAPI(newAccount);
+    return response.json({ redirect: '/maker' });
+  } catch (err) {
+    console.log(err);
+    if (err.code === 11000) {
+      return response.status(400).json({ error: 'Username already in use' });
+    }
+    return response.status(400).json({ error: 'An error occurred' });
+  }
 };

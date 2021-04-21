@@ -1,17 +1,17 @@
-const mongoose = require('mongoose');
-const _ = require('underscore');
+import { Types, Schema, model } from 'mongoose';
+import { escape } from 'underscore';
 
 // mongoose.Promise = global.Promise;
 
 let PlaceModel = {};
 
 // Converts a string of an ID to a mongoose ID
-const convertId = mongoose.Types.ObjectId;
+const convertId = Types.ObjectId;
 
 // Converts
-const setName = (name) => _.escape(name).trim();
+const setName = (name) => escape(name).trim();
 
-const PlaceSchema = new mongoose.Schema({
+const PlaceSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -19,7 +19,7 @@ const PlaceSchema = new mongoose.Schema({
     set: setName,
   },
   addedBy: {
-    type: mongoose.Schema.ObjectId,
+    type: Schema.ObjectId,
     // required: true,
     ref: 'Account',
   },
@@ -30,7 +30,7 @@ const PlaceSchema = new mongoose.Schema({
   reccomendedBy: {
     name: String,
     _id: {
-      type: mongoose.Schema.ObjectId,
+      type: Schema.ObjectId,
       ref: 'Account',
     },
   },
@@ -55,9 +55,9 @@ PlaceSchema.statics.findByOwner = (ownerId, callback) => {
   return PlaceModel.find(search).select('_id name addedBy notes').lean().exec(callback);
 };
 
-PlaceModel = mongoose.model('Place', PlaceSchema);
+PlaceModel = model('Place', PlaceSchema);
 
-module.exports = {
+export {
   PlaceModel,
   PlaceSchema,
 };

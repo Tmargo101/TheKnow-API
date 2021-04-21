@@ -1,14 +1,14 @@
-const crypto = require('crypto');
-const mongoose = require('mongoose');
+import { randomBytes, pbkdf2Sync } from 'crypto';
+import { Schema, model } from 'mongoose';
 
-mongoose.Promise = global.Promise;
+// Promise = global.Promise;
 
 let AccountModel = {};
 const iterations = 10000;
 const saltLength = 64;
 const keyLength = 64;
 
-const AccountSchema = new mongoose.Schema({
+const AccountSchema = new Schema({
   username: {
     type: String,
     required: true,
@@ -36,52 +36,52 @@ AccountSchema.statics.toAPI = (doc) => ({
   _id: doc._id,
 });
 
-const validatePassword = (doc, password, callback) => {
+const validatePassword = async (doc, password) => {
   const pass = doc.password;
 
-  return crypto.pbkdf2(password, doc.salt, iterations, keyLength, 'RSA-SHA512', (err, hash) => {
-    if (hash.toString('hex') !== pass) {
-      return callback(false);
-    }
-    return callback(true);
-  });
+  const hash = pbkdf2Sync(password, doc.salt, iterations, keyLength, 'RSA-SHA512');
+
+  if (hash.toString('hex') !== pass) {
+    return false;
+  }
+  return true;
 };
 
-AccountSchema.statics.findByUsername = (name, callback) => {
+AccountSchema.statics.findByUsername = async (name) => {
   const search = {
     username: name,
   };
 
-  return AccountModel.findOne(search, callback);
+  const results = await AccountModel.findOne(search).exec();
+  return results;
 };
 
-AccountSchema.statics.generateHash = (password, callback) => {
-  const salt = crypto.randomBytes(saltLength);
-
-  crypto.pbkdf2(password, salt, iterations, keyLength, 'RSA-SHA512', (err, hash) => callback(salt, hash.toString('hex')));
+AccountSchema.statics.generateHash = async (password) => {
+  const salt = randomBytes(saltLength);
+  const hash = pbkdf2Sync(password, salt, iterations, keyLength, 'RSA-SHA512');
+  return {
+    salt,
+    hash: hash.toString('hex'),
+  };
 };
 
-AccountSchema.statics.authenticate = (username, password, callback) => {
-  AccountModel.findByUsername(username, (err, doc) => {
-    if (err) {
-      return callback(err);
-    }
+AccountSchema.statics.authenticate = async (username, password) => {
+  const accountDoc = await AccountModel.findByUsername(username);
+  if (accountDoc === null) {
+    return null;
+  }
 
-    if (!doc) {
-      return callback();
-    }
+  const validPassword = await validatePassword(accountDoc, password);
 
-    return validatePassword(doc, password, (result) => {
-      if (result === true) {
-        return callback(null, doc);
-      }
-
-      return callback();
-    });
-  });
+  if (validPassword) {
+    return accountDoc;
+  }
+  return null;
 };
 
-AccountModel = mongoose.model('Account', AccountSchema);
+AccountModel = model('Account', AccountSchema);
 
-module.exports.AccountModel = AccountModel;
-module.exports.AccountSchema = AccountSchema;
+export {
+  AccountModel,
+  AccountSchema,
+};
