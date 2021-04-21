@@ -1,5 +1,12 @@
-const home = (request, response) => {
+const home = async (request, response) => {
   response.status(200).json({ success: 'API is live' });
 };
 
-module.exports.home = home;
+const notFound = async (request, response) => {
+  response.status(404).json({ error: 'Not found' });
+};
+
+module.exports = {
+  home,
+  notFound,
+};
