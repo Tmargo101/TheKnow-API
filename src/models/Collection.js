@@ -23,18 +23,15 @@ const CollectionSchema = new Schema({
     required: true,
     ref: 'Account',
   },
-  members: [
-    {
-      memberId: {
-        type: Schema.ObjectId,
-        ref: 'Account',
-      },
-    },
-  ],
-  places: {
-    type: Array,
+  members: [{
+    type: Schema.ObjectId,
+    ref: 'Account',
+  }],
+  places: [{
+    type: Types.ObjectId,
+    ref: 'Place',
     required: true,
-  },
+  }],
   createdDate: {
     type: Date,
     default: Date.now,
@@ -67,6 +64,7 @@ CollectionSchema.statics.findCollection = async (collectionId) => {
 
   const results = await CollectionModel
     .find(search)
+    .populate('places')
     .lean()
     .exec();
   return results;

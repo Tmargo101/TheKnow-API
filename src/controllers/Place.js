@@ -2,6 +2,8 @@ import { Place, Collection } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
+// TODO: Refactor these helper functions / validators to new file?
+
 // Ensure all needed params are present before creating a new place.
 // If any params are not present, respond with an error message
 const validateNewPlace = (request, response) => {
@@ -38,7 +40,7 @@ const validateGetPlace = (request, response) => {
 };
 
 const validateGetAllPlaces = (request, response) => {
-  if (!request.body.owner) {
+  if (!request.body.owner && !request.body.collectionID) {
     // Return a generic error that not all parameters have been included
     // with the request
     Responses.sendGenericErrorResponse(
@@ -89,7 +91,7 @@ export const addPlace = async (request, response) => {
     await newPlace.save();
 
     // Update the parent collection's places array with the new place's ID
-    await addPlaceToCollection(request.body.collectionID, newPlace._id);
+    await addPlaceToCollection(request.body.collectionId, newPlace._id);
   } catch (err) {
     // Send error if either database operation throws an error
     Responses.sendGenericErrorResponse(
