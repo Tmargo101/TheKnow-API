@@ -22,4 +22,5 @@ export const RESPONSE_MESSAGE = {
   API_LIVE: 'TheKnow-API',
   NOT_FOUND: 'Not found',
   NOT_SAVED: 'Database returned an error',
+  NO_TOKEN_ERROR: 'Please include token with your request',
 };

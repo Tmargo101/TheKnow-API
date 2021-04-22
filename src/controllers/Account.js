@@ -1,3 +1,5 @@
+import * as jwt from 'jsonwebtoken';
+
 import * as Account from '../models/Account';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
@@ -30,6 +32,13 @@ const validateSignup = (request, response) => {
   return true;
 };
 
+const createToken = (userId) => {
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+    expiresIn: 7776000, // Expires in 90 days
+  });
+  return token;
+};
+
 export const login = async (request, response) => {
   const validParams = validateLogin(request, response);
   if (!validParams) { return; }
@@ -48,12 +57,16 @@ export const login = async (request, response) => {
     return;
   }
 
-  request.session.account = Account.AccountModel.toAPI(account);
+  // request.session.account = Account.AccountModel.toAPI(account);
+
+  // Create JSON Web Token
+  const token = createToken(account._id);
 
   // Respond with success message
-  Responses.sendGenericSuccessResponse(
+  Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.LOGIN_SUCCESS,
+    token,
   );
 };
 
@@ -91,10 +104,13 @@ export const signup = async (request, response) => {
 
   request.session.account = Account.AccountModel.toAPI(newAccount);
 
-  // Send success response
-  Responses.sendGenericSuccessResponse(
+  const token = createToken(newAccount._id);
+
+  // Respond with success message
+  Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.SIGNUP_SUCCESS,
+    token,
   );
 };
 

@@ -1,3 +1,22 @@
+import * as jwt from 'jsonwebtoken';
+
+import * as Responses from '../utilities/Responses';
+import * as Strings from '../Strings';
+
+export const validateToken = async (request, response, next) => {
+  const token = request.headers['x-access-token'];
+  if (!token) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.NO_TOKEN_ERROR,
+    );
+    return;
+  }
+  const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+  request.userId = decodedToken.id;
+  return next();
+};
+
 // Ensure a session for the user exists before completing their request
 export const requiresLogin = (request, response, next) => {
   if (!request.session.account) {
