@@ -48,11 +48,29 @@ CollectionSchema.statics.toAPI = (doc) => ({
   places: doc.places,
 });
 
-CollectionSchema.statics.findByOwner = (ownerId, callback) => {
+CollectionSchema.statics.findByOwner = async (ownerId) => {
   const search = {
     owner: convertId(ownerId),
   };
-  return CollectionSchema.find(search).select('_id name owner places').lean().exec(callback);
+
+  const results = await CollectionModel
+    .find(search)
+    .lean()
+    .exec();
+  return results;
+};
+
+CollectionSchema.statics.findOne = async (ownerId, collectionId) => {
+  const search = {
+    owner: convertId(ownerId),
+    _id: collectionId,
+  };
+
+  const results = await CollectionModel
+    .find(search)
+    .lean()
+    .exec();
+  return results;
 };
 
 CollectionModel = model('Collection', CollectionSchema);

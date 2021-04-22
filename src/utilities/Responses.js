@@ -1,23 +1,40 @@
-const sendGenericSuccessResponse = (response, _message, responseObject) => {
+import * as Strings from '../Strings';
+
+export const sendDataResponse = (response, _message, responseObject) => {
   response
     .status(200)
     .json({
-      status: 'FFF',
+      status: Strings.RESPONSE_STATUS.SUCCESS,
       message: _message,
-      object: responseObject,
+      contents: responseObject,
     });
 };
 
-const sendGenericErrorResponse = (response, _message) => {
+export const sendGenericSuccessResponse = (response, _message) => {
+  response
+    .status(200)
+    .json({
+      status: Strings.RESPONSE_STATUS.SUCCESS,
+      message: _message,
+    });
+};
+
+export const sendGenericErrorResponse = (response, _message) => {
   response
     .status(400)
     .json({
-      status: 'STRING RESPONSE ERROR',
+      status: Strings.RESPONSE_STATUS.ERROR,
       message: _message,
     });
+  return null;
 };
 
-export default {
-  sendGenericErrorResponse,
-  sendGenericSuccessResponse,
+export const sendNotFoundResponse = (response, _message) => {
+  response
+    .status(404)
+    .json({
+      status: Strings.RESPONSE_STATUS.ERROR,
+      message: _message,
+    });
+  return null;
 };

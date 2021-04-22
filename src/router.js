@@ -1,4 +1,4 @@
-import * as Home from './controllers/home';
+import * as Home from './controllers/Home';
 import * as Account from './controllers/Account';
 import * as Collection from './controllers/Collection';
 import * as Place from './controllers/Place';

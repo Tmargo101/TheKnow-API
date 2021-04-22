@@ -1,59 +1,104 @@
 import * as Account from '../models/Account';
+import * as Responses from '../utilities/Responses';
+import * as Strings from '../Strings';
 
-export const logout = (request, response) => {
-  request.session.destroy();
-  response.redirect('/');
+const validateLogin = (request, response) => {
+  if (!request.body.username || !request.body.password) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS);
+    return false;
+  }
+  return true;
+};
+
+const validateSignup = (request, response) => {
+  if (!request.body.username || !request.body.pass || !request.body.pass2) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+    );
+    return false;
+  }
+
+  if (request.body.pass !== request.body.pass2) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PASSWORDS_DONT_MATCH,
+    );
+    return false;
+  }
+  // Valid signup data
+  return true;
 };
 
 export const login = async (request, response) => {
+  const validParams = validateLogin(request, response);
+  if (!validParams) { return; }
+
   const username = `${request.body.username}`;
-  const password = `${request.body.pass}`;
+  const password = `${request.body.password}`;
 
-  if (!request.body.username || !request.body.password) {
-    return response.status(400).json({ error: 'All fields are requred' });
-  }
-
+  // Run authentication with the AccountModel
   const account = await Account.AccountModel.authenticate(username, password);
 
   if (account === null) {
-    return response.status(401).json({ error: 'Wrong username or password' });
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.WRONG_USERNAME_PASSWORD,
+    );
+    return;
   }
+
   request.session.account = Account.AccountModel.toAPI(account);
-  return response.json({ redirect: '/maker' });
+
+  // Respond with success message
+  Responses.sendGenericSuccessResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.LOGIN_SUCCESS,
+  );
 };
 
 export const signup = async (request, response) => {
-  const username = `${request.body.username}`;
-  const pass = `${request.body.pass}`;
-  const pass2 = `${request.body.pass2}`;
+  const validParams = validateSignup(request, response);
+  if (!validParams) { return; }
 
-  if (!request.body.username || !request.body.pass || !request.body.pass2) {
-    return response.status(400).json({ error: 'All fields are required' });
-  }
+  const newUsername = `${request.body.username}`;
+  const newPassword = `${request.body.pass}`;
 
-  if (pass !== pass2) {
-    return response.status(400).json({ error: 'Passwords do not match' });
-  }
+  // Generate salt & hash
+  const encryptedPassword = await Account.AccountModel.generateHash(newPassword);
 
-  const encryptedPassword = await Account.AccountModel.generateHash(pass);
-
-  const accountData = {
-    username,
+  // Create new account object
+  const newAccountData = {
+    username: newUsername,
     salt: encryptedPassword.salt,
     password: encryptedPassword.hash,
   };
 
-  const newAccount = new Account.AccountModel(accountData);
+  // convert account
+  const newAccount = new Account.AccountModel(newAccountData);
 
   try {
     await newAccount.save();
-    request.session.account = Account.AccountModel.toAPI(newAccount);
-    return response.json({ redirect: '/maker' });
   } catch (err) {
-    console.log(err);
     if (err.code === 11000) {
-      return response.status(400).json({ error: 'Username already in use' });
+      Responses.sendGenericErrorResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.USERNAME_ALREADY_EXISTS,
+      );
+      return;
     }
-    return response.status(400).json({ error: 'An error occurred' });
-  }
+  } // catch
+
+  request.session.account = Account.AccountModel.toAPI(newAccount);
+
+  // Send success response
+  Responses.sendGenericSuccessResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.SIGNUP_SUCCESS,
+  );
+};
+
+export const logout = (request, response) => {
+  request.session.destroy();
+  response.redirect('/');
 };
