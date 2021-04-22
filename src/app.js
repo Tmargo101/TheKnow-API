@@ -1,8 +1,9 @@
 // const path = require('path');
-import express from 'express';
-import compression from 'compression';
 // const favicon = require('serve-favicon');
 // const cookieParser = require('cookie-parser');
+
+import express from 'express';
+import compression from 'compression';
 import { urlencoded } from 'body-parser';
 import { connect } from 'mongoose';
 import session from 'express-session';
@@ -72,7 +73,7 @@ app.use(session({
   }),
   secret: '5d4db169307b415fb4e9',
   resave: true,
-  saveUninitalized: true,
+  saveUninitialized: true,
   cookie: {
     httpOnly: true,
   },
@@ -85,5 +86,6 @@ router(app);
 
 // Set express to start listening for network requests.
 app.listen(port, (err) => {
+  console.log('Server is running');
   if (err) throw err;
 });

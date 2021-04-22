@@ -9,7 +9,7 @@ export const login = async (request, response) => {
   const username = `${request.body.username}`;
   const password = `${request.body.pass}`;
 
-  if (!username || !password) {
+  if (!request.body.username || !request.body.password) {
     return response.status(400).json({ error: 'All fields are requred' });
   }
 

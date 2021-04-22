@@ -8,11 +8,10 @@
   "description": "API Server for The Know",
   "main": "./server/app.js",
   "scripts": {
-    "pretest": "eslint ./server --fix",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Tests complete\"",
     "start": "npm run build && node ./dist/app.js",
-    "nodemon": "nodemon --watch ./server ./server/app.js",
-    "babelmon": "nodemon --exec babel-node src/app.js",
+    "nodemon": "nodemon --exec babel-node src/app.js",
     "build": "babel src -d dist"
   },
   "keywords": [
