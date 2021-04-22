@@ -48,11 +48,28 @@ PlaceSchema.statics.toAPI = (doc) => ({
   },
 });
 
-PlaceSchema.statics.findByOwner = (ownerId, callback) => {
+PlaceSchema.statics.findByOwner = async (ownerId) => {
   const search = {
-    owner: convertId(ownerId),
+    addedBy: convertId(ownerId),
   };
-  return PlaceModel.find(search).select('_id name addedBy notes').lean().exec(callback);
+
+  const results = await PlaceModel
+    .find(search)
+    .lean()
+    .exec();
+  return results;
+};
+
+PlaceSchema.statics.findPlace = async (placeId) => {
+  const search = {
+    _id: convertId(placeId),
+  };
+
+  const results = await PlaceModel
+    .find(search)
+    .lean()
+    .exec();
+  return results;
 };
 
 PlaceModel = model('Place', PlaceSchema);

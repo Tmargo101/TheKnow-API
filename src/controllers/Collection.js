@@ -77,8 +77,7 @@ export const getCollection = async (request, response) => {
   const validData = validateGetCollection(request, response);
   if (!validData) { return; }
 
-  const collection = await Collection.CollectionModel.findOne(
-    request.body.owner,
+  const collection = await Collection.CollectionModel.findCollection(
     request.params.id,
   );
   Responses.sendDataResponse(

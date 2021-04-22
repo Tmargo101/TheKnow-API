@@ -5,6 +5,7 @@ export const RESPONSE_STATUS = {
 };
 
 export const RESPONSE_MESSAGE = {
+  PLACE_GET_SUCCESS: 'Place returned',
   PLACE_ADD_SUCCESS: 'Place was added successfully!',
   PLACE_UPDATE_SUCCESS: 'Place was updated successfully!',
   PLACE_REMOVE_SUCCESS: 'Place was removed successfully!',

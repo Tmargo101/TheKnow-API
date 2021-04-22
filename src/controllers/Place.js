@@ -1,17 +1,54 @@
 import { Place, Collection } from '../models';
+import * as Responses from '../utilities/Responses';
+import * as Strings from '../Strings';
 
 // Ensure all needed params are present before creating a new place.
 // If any params are not present, respond with an error message
 const validateNewPlace = (request, response) => {
   // Validate that all params needed are included
-  if (!request.body.name || !request.body.mapLink || !request.body.addedBy) {
+  if (
+    !request.body.name
+    || !request.body.mapLink
+    || !request.body.addedBy
+    || !request.body.collectionId
+  ) {
     // Return a generic error that not all parameters have been included
     // with the request
-    response.status().json({
-      status: 'error',
-      message: 'not all params',
-    });
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+    );
+    return false;
   }
+  return true;
+};
+
+const validateGetPlace = (request, response) => {
+  if (!request.params.id) {
+    // Return a generic error that not all parameters have been included
+    // with the request
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+    );
+    return false;
+  }
+  // Valid data
+  return true;
+};
+
+const validateGetAllPlaces = (request, response) => {
+  if (!request.body.owner) {
+    // Return a generic error that not all parameters have been included
+    // with the request
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+    );
+    return false;
+  }
+  // Valid data
+  return true;
 };
 
 // Update a collection's "Places" array with a new PlaceID
@@ -39,33 +76,71 @@ const createNewPlaceObject = (request) => {
 };
 
 export const addPlace = async (request, response) => {
-  validateNewPlace(request, response);
+  // Validate database
+  const validData = validateNewPlace(request, response);
+  if (!validData) { return; }
 
+  // Create new place object
+  const newPlace = createNewPlaceObject(request);
+
+  // Database actions
   try {
-    const newPlace = createNewPlaceObject(request);
+    // Save the new place to the database
     await newPlace.save();
 
     // Update the parent collection's places array with the new place's ID
-    const parentCollection = await addPlaceToCollection(request.body.collectionID, newPlace._id);
-
-    // Respond
-    response.json({
-      status: 'success',
-      message: 'place add success',
-      placeID: newPlace._id,
-      collectionID: parentCollection._id,
-    });
+    await addPlaceToCollection(request.body.collectionID, newPlace._id);
   } catch (err) {
-    console.log(err);
+    // Send error if either database operation throws an error
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.NOT_SAVED,
+    );
+    return;
   }
+
+  // Compose response
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.PLACE_ADD_SUCCESS,
+    newPlace,
+  );
 };
 
-export const getPlace = async (request, response, id) => {
-  response.json({ id });
+export const getPlace = async (request, response) => {
+  // Validate input
+  const validData = validateGetPlace(request, response);
+  if (!validData) { return; }
+
+  // Get place from database
+  const place = await Place.PlaceModel.findPlace(
+    request.params.id,
+  );
+
+  // Compose response
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
+    place,
+  );
 };
 
-export const getAllPlaces = async (request, response, id) => {
-  response.json({ id });
+export const getAllPlaces = async (request, response) => {
+  // Validate input
+  const validData = validateGetAllPlaces(request, response);
+  if (!validData) { return; }
+
+  // Get place from database
+  const places = await Place.PlaceModel.findByOwner(
+    request.body.owner,
+  );
+
+  // Compose response
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
+    places,
+  );
 };
 
 export const updatePlace = async (request, response, id) => {

@@ -60,10 +60,9 @@ CollectionSchema.statics.findByOwner = async (ownerId) => {
   return results;
 };
 
-CollectionSchema.statics.findOne = async (ownerId, collectionId) => {
+CollectionSchema.statics.findCollection = async (collectionId) => {
   const search = {
-    owner: convertId(ownerId),
-    _id: collectionId,
+    _id: convertId(collectionId),
   };
 
   const results = await CollectionModel
