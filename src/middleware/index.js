@@ -12,9 +12,19 @@ export const validateToken = async (request, response, next) => {
     );
     return;
   }
-  const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-  request.userId = decodedToken.id;
-  return next();
+
+  try {
+    const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+    request.userId = decodedToken.id;
+  } catch (err) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
+    );
+    return;
+  }
+
+  next();
 };
 
 // Ensure a session for the user exists before completing their request

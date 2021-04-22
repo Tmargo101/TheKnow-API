@@ -23,4 +23,5 @@ export const RESPONSE_MESSAGE = {
   NOT_FOUND: 'Not found',
   NOT_SAVED: 'Database returned an error',
   NO_TOKEN_ERROR: 'Please include token with your request',
+  TOKEN_INVALID_ERROR: 'Token was invalid.  Please try re-logging in',
 };
