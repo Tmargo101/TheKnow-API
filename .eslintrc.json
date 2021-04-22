@@ -1,6 +1,6 @@
 {
     "env": {
-        "browser": true,
+        "browser": false,
         "es2021": true
     },
     "extends": [
@@ -11,6 +11,7 @@
         "sourceType": "module"
     },
     "rules": {
-        "no-underscore-dangle": "off"
+        "no-underscore-dangle": "off",
+        "import/no-mutable-exports": "off"
     }
 }
