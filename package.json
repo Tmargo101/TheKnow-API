@@ -10,9 +10,11 @@
   "scripts": {
     "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\"",
-    "start": "npm run build && node ./dist/app.js",
+    "start2": "npm run build && node ./dist/app.js",
+    "start": "node ./dist/app.js",
     "nodemon": "nodemon --exec babel-node src/app.js",
-    "build": "babel src -d dist"
+    "build": "babel src -d dist",
+    "heroku-postbuild": "babel src -d dist"
   },
   "keywords": [
     "Node",
