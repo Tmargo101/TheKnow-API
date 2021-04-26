@@ -8,6 +8,7 @@
   "description": "API Server for The Know",
   "main": "./server/app.js",
   "scripts": {
+
     "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\"",
     "start2": "npm run build && node ./dist/app.js",
@@ -15,7 +16,8 @@
     "nodemon": "nodemon --exec babel-node src/app.js",
     "build": "babel src -d dist",
     "heroku-postbuild": "babel src -d dist",
-    "heroku-preinstall": "rm -rf /dist"
+    "heroku-preinstall": "rm -rf /dist",
+    "preinstall": "rm -rf /dist"
   },
   "keywords": [
     "Node",
