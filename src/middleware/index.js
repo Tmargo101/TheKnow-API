@@ -15,13 +15,23 @@ export const validateToken = async (request, response, next) => {
   }
 
   try {
+    // Decode the JWT & check if it's assocated with a user in the database
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
     const idAssociatedWithToken = await Account.AccountModel.verifyToken(token);
+
+    // If the token was associated with the user, and the associated user matches the JWT's userID, continue
     if (idAssociatedWithToken !== 0 && idAssociatedWithToken === decodedToken.id) {
       request.userId = decodedToken.id;
       next();
       return;
     }
+
+    // If the token wasn't associated with a user account, send an error response
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
+    );
+    return;
   } catch (err) {
     console.log(err);
     Responses.sendGenericErrorResponse(
