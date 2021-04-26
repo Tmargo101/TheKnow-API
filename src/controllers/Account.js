@@ -62,11 +62,21 @@ export const login = async (request, response) => {
   // Create JSON Web Token
   const token = createToken(account._id);
 
+  // Save token to account's Tokens array
+  account.tokens.push(token);
+  await account.save();
+
+  // Create Response object
+  const responseObject = {
+    token,
+    id: account._id,
+  };
+
   // Respond with success message
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.LOGIN_SUCCESS,
-    token,
+    responseObject,
   );
 };
 
@@ -104,17 +114,38 @@ export const signup = async (request, response) => {
 
   request.session.account = Account.AccountModel.toAPI(newAccount);
 
+  // Generate new token
   const token = createToken(newAccount._id);
+
+  newAccount.tokens.push(token);
+  await newAccount.save();
+
+  const responseObject = {
+    token,
+    id: newAccount._id,
+  };
 
   // Respond with success message
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.SIGNUP_SUCCESS,
-    token,
+    responseObject,
   );
 };
 
-export const logout = (request, response) => {
-  request.session.destroy();
-  response.redirect('/');
+export const logout = async (request, response) => {
+  // Decode token for User ID
+  const token = request.headers['x-access-token'];
+  const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+  const { id } = decodedToken;
+
+  // Remove token from
+  const tokensRemoved = await Account.AccountModel.removeToken(id, token);
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.LOGOUT_SUCCESSFUL,
+    { removed: tokensRemoved },
+  );
+  // request.session.destroy();
+  // response.redirect('/');
 };

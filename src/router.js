@@ -9,7 +9,7 @@ const router = (app) => {
   app.get('/', Home.home);
 
   // Authentication functions
-  app.get('/logout', middleware.validateToken, Account.logout);
+  app.post('/logout', middleware.validateToken, Account.logout);
   app.post('/login', Account.login);
   app.post('/signup', Account.signup);
 

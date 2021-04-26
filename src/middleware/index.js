@@ -2,6 +2,7 @@ import * as jwt from 'jsonwebtoken';
 
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
+import * as Account from '../models/Account';
 
 export const validateToken = async (request, response, next) => {
   const token = request.headers['x-access-token'];
@@ -15,8 +16,14 @@ export const validateToken = async (request, response, next) => {
 
   try {
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-    request.userId = decodedToken.id;
+    const idAssociatedWithToken = await Account.AccountModel.verifyToken(token);
+    if (idAssociatedWithToken !== 0 && idAssociatedWithToken === decodedToken.id) {
+      request.userId = decodedToken.id;
+      next();
+      return;
+    }
   } catch (err) {
+    console.log(err);
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,

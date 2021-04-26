@@ -28,6 +28,10 @@ const AccountSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  tokens: [{
+    type: String,
+    required: true,
+  }],
 });
 
 AccountSchema.statics.toAPI = (doc) => ({
@@ -77,6 +81,38 @@ AccountSchema.statics.authenticate = async (username, password) => {
     return accountDoc;
   }
   return null;
+};
+
+AccountSchema.statics.verifyToken = async (token) => {
+  const search = {
+    tokens: token,
+  };
+
+  const results = await AccountModel.find(search, 'id tokens').exec();
+  if (results[0] && results[0].tokens.includes(token)) {
+    return results[0].id;
+  }
+  return 0;
+};
+
+AccountSchema.statics.removeToken = async (id, token) => {
+  const search = {
+    tokens: token,
+  };
+
+  const update = {
+    $pullAll: {
+      tokens: [token],
+    },
+  };
+  let tokensRemoved = 0;
+  try {
+    const accountDoc = await AccountModel.updateOne(search, update);
+    tokensRemoved = accountDoc.n;
+  } catch (err) {
+    console.log(err);
+  }
+  return tokensRemoved;
 };
 
 AccountModel = model('Account', AccountSchema);
