@@ -53,6 +53,20 @@ const validateGetAllPlaces = (request, response) => {
   return true;
 };
 
+const validateDeletePlace = (request, response) => {
+  if (!request.params.id) {
+    // Return a generic error that not all parameters have been included
+    // with the request
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+    );
+    return false;
+  }
+  // Valid data
+  return true;
+};
+
 // Update a collection's "Places" array with a new PlaceID
 const addPlaceToCollection = async (collectionID, placeID) => {
   const parentCollection = await Collection.CollectionModel.findByIdAndUpdate(
@@ -149,6 +163,23 @@ export const updatePlace = async (request, response, id) => {
   response.json({ id });
 };
 
-export const removePlace = async (request, response, id) => {
-  response.json({ id });
+export const removePlace = async (request, response) => {
+  // Validate Input
+  const validData = validateDeletePlace(request, response);
+  if (!validData) { return; }
+
+  //Remove place
+  const place = await Place.PlaceModel.deletePlace(request.params.id);
+
+  // Create response object
+  const responseObject = {
+    deleted: place.deletedCount,
+  };
+
+  // Send response
+  Responses.sendDataResponse(
+    response,
+    'Deleted Place',
+    responseObject,
+  );
 };

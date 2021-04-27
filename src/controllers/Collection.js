@@ -1,4 +1,4 @@
-import { Collection } from '../models';
+import { Collection, Place } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
@@ -106,6 +106,35 @@ export const updateCollection = async (request, response, id) => {
   response.json({ id });
 };
 
-export const removeCollection = async (request, response, id) => {
-  response.json({ id });
+export const removeCollection = async (request, response) => {
+  // Validate Input
+  // const validData = validateDeleteCollection(request, response);
+  // if (!validData) { return; }
+
+  // Get the collection object
+  const collection = await Collection.CollectionModel.findCollection(request.params.id);
+
+  let count = 0;
+  // Remove all places in the collection
+  collection[0].places.forEach(async (place) => {
+    await Place.PlaceModel.deletePlace(place._id);
+    count += 1;
+  });
+
+  //Remove the collection
+  const deletedCollection = await Collection.CollectionModel.deleteCollection(request.params.id);
+
+  // Create response object
+  const responseObject = {
+    deletedPlaces: count,
+    deleted: deletedCollection.deletedCount,
+  };
+
+  // Send response
+  Responses.sendDataResponse(
+    response,
+    'Deleted Place',
+    responseObject,
+  );
+
 };

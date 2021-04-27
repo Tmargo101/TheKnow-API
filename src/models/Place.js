@@ -72,6 +72,16 @@ PlaceSchema.statics.findPlace = async (placeId) => {
   return results;
 };
 
+PlaceSchema.statics.deletePlace = async (placeId) => {
+  const search = {
+    _id: convertId(placeId),
+  };
+
+  const results = await PlaceModel.deleteOne(search).exec();
+  console.log(results);
+  return results;
+};
+
 PlaceModel = model('Place', PlaceSchema);
 
 export {

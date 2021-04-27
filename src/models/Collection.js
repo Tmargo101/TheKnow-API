@@ -1,5 +1,6 @@
 import { Types, Schema, model } from 'mongoose';
 import { escape } from 'underscore';
+import { PlaceModel } from './Place';
 
 // mongoose.Promise = global.Promise;
 
@@ -67,6 +68,16 @@ CollectionSchema.statics.findCollection = async (collectionId) => {
     .populate('places')
     .lean()
     .exec();
+  return results;
+};
+
+CollectionSchema.statics.deleteCollection = async (collectionId) => {
+  const search = {
+    _id: convertId(collectionId),
+  };
+
+  const results = await CollectionModel.deleteOne(search).exec();
+  console.log(results);
   return results;
 };
 
