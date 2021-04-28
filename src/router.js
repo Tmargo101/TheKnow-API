@@ -13,6 +13,7 @@ const router = (app) => {
   app.post('/logout', middleware.validateToken, Account.logout);
   app.post('/login', Account.login);
   app.post('/signup', Account.signup);
+  app.post('/validate', Account.validateToken);
 
   // Collection routes
   app.get('/collections', middleware.validateToken, Collection.getAllCollections);

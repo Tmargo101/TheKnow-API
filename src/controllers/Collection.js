@@ -121,7 +121,7 @@ export const removeCollection = async (request, response) => {
     count += 1;
   });
 
-  //Remove the collection
+  // Remove the collection
   const deletedCollection = await Collection.CollectionModel.deleteCollection(request.params.id);
 
   // Create response object
@@ -136,5 +136,4 @@ export const removeCollection = async (request, response) => {
     'Deleted Place',
     responseObject,
   );
-
 };
