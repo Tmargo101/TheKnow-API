@@ -58,6 +58,18 @@ CollectionSchema.statics.findByOwner = async (ownerId) => {
   return results;
 };
 
+CollectionSchema.statics.findByMember = async (userId) => {
+  const search = {
+    members: convertId(userId),
+  };
+
+  const results = await CollectionModel
+    .find(search)
+    .lean()
+    .exec();
+  return results;
+};
+
 CollectionSchema.statics.findCollection = async (collectionId) => {
   const search = {
     _id: convertId(collectionId),
