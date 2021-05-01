@@ -67,7 +67,7 @@ export const login = async (request, response) => {
   await account.save();
 
   // Create Response object
-  const responseObject = {
+  const user = {
     token,
     id: account._id,
   };
@@ -76,7 +76,7 @@ export const login = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.LOGIN_SUCCESS,
-    responseObject,
+    { user },
   );
 };
 
