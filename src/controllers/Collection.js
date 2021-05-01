@@ -5,7 +5,7 @@ import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
 const validateNewCollection = (request, response) => {
-  if (!request.body.name || !request.body.owner) {
+  if (!request.body.name || !request.body.owner || !Types.ObjectId.isValid(request.body.owner)) {
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
@@ -16,7 +16,7 @@ const validateNewCollection = (request, response) => {
 };
 
 const validateGetAllCollections = (request, response) => {
-  if (!request.query.user) {
+  if (!request.query.user || !Types.ObjectId.isValid(request.query.user)) {
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,

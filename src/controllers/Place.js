@@ -42,7 +42,7 @@ const validateGetPlace = (request, response) => {
 };
 
 const validateGetAllPlaces = (request, response) => {
-  if (!request.query.addedBy && !request.query.collectionID) {
+  if (!request.query.addedBy || !Types.ObjectId.isValid(request.query.addedBy)) {
     // Return a generic error that not all parameters have been included
     // with the request
     Responses.sendGenericErrorResponse(
