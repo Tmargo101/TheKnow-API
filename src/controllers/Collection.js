@@ -26,14 +26,7 @@ const validateGetAllCollections = (request, response) => {
 };
 
 const validateGetCollection = (request, response) => {
-  if (!request.params.id) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
-    );
-    return false;
-  }
-  if (!request.body.owner) {
+  if (!request.params.id || !request.query.owner) {
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,

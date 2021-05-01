@@ -40,7 +40,7 @@ const validateGetPlace = (request, response) => {
 };
 
 const validateGetAllPlaces = (request, response) => {
-  if (!request.body.owner && !request.body.collectionID) {
+  if (!request.query.addedBy && !request.query.collectionID) {
     // Return a generic error that not all parameters have been included
     // with the request
     Responses.sendGenericErrorResponse(
@@ -148,7 +148,7 @@ export const getAllPlaces = async (request, response) => {
 
   // Get place from database
   const places = await Place.PlaceModel.findByOwner(
-    request.body.owner,
+    request.query.addedBy,
   );
 
   // Compose response
@@ -168,7 +168,7 @@ export const removePlace = async (request, response) => {
   const validData = validateDeletePlace(request, response);
   if (!validData) { return; }
 
-  //Remove place
+  // Remove place
   const place = await Place.PlaceModel.deletePlace(request.params.id);
 
   // Create response object
