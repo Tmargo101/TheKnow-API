@@ -14,7 +14,7 @@ const validateNewCollection = (request, response) => {
 };
 
 const validateGetAllCollections = (request, response) => {
-  if (!request.body.user) {
+  if (!request.query.user) {
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
@@ -96,7 +96,7 @@ export const getAllCollections = async (request, response) => {
   if (!validData) { return; }
 
   const collections = await Collection.CollectionModel.findByMember(
-    request.body.user,
+    request.query.user,
   );
   Responses.sendDataResponse(
     response,
