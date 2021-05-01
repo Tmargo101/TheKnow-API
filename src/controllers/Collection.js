@@ -81,7 +81,7 @@ export const getCollection = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.COLLECTION_GET_SUCCESS,
-    collection,
+    { collection },
   );
 };
 
