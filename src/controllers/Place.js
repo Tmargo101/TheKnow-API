@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 import { Place, Collection } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
@@ -26,7 +28,7 @@ const validateNewPlace = (request, response) => {
 };
 
 const validateGetPlace = (request, response) => {
-  if (!request.params.id) {
+  if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
     // Return a generic error that not all parameters have been included
     // with the request
     Responses.sendGenericErrorResponse(
@@ -119,7 +121,7 @@ export const addPlace = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.PLACE_ADD_SUCCESS,
-    newPlace,
+    { newPlace },
   );
 };
 
@@ -137,7 +139,7 @@ export const getPlace = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
-    place,
+    { place },
   );
 };
 
@@ -155,7 +157,7 @@ export const getAllPlaces = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
-    places,
+    { places },
   );
 };
 
@@ -172,7 +174,7 @@ export const removePlace = async (request, response) => {
   const place = await Place.PlaceModel.deletePlace(request.params.id);
 
   // Create response object
-  const responseObject = {
+  const deletedPlace = {
     deleted: place.deletedCount,
   };
 
@@ -180,6 +182,6 @@ export const removePlace = async (request, response) => {
   Responses.sendDataResponse(
     response,
     'Deleted Place',
-    responseObject,
+    { deletedPlace },
   );
 };

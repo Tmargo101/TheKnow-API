@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 import { Collection, Place } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
@@ -26,7 +28,7 @@ const validateGetAllCollections = (request, response) => {
 };
 
 const validateGetCollection = (request, response) => {
-  if (!request.params.id || !request.query.owner) {
+  if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
@@ -64,7 +66,7 @@ export const addCollection = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.COLLECTION_ADD_SUCCESS,
-    newCollection,
+    { newCollection },
   );
 };
 
@@ -94,7 +96,7 @@ export const getAllCollections = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.COLLECTION_GET_SUCCESS,
-    collections,
+    { collections },
   );
 };
 
@@ -118,18 +120,18 @@ export const removeCollection = async (request, response) => {
   });
 
   // Remove the collection
-  const deletedCollection = await Collection.CollectionModel.deleteCollection(request.params.id);
+  const deleteCollection = await Collection.CollectionModel.deleteCollection(request.params.id);
 
   // Create response object
-  const responseObject = {
+  const deletedCollection = {
     deletedPlaces: count,
-    deleted: deletedCollection.deletedCount,
+    deleted: deleteCollection.deletedCount,
   };
 
   // Send response
   Responses.sendDataResponse(
     response,
-    'Deleted Place',
-    responseObject,
+    'Deleted Collection',
+    { deletedCollection },
   );
 };
