@@ -6,7 +6,7 @@ import * as Strings from '../Strings';
 
 const validateLogin = (request, response) => {
   if (!request.body.username || !request.body.password) {
-    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS);
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.VALIDATION_FAILED);
     return false;
   }
   return true;
@@ -16,7 +16,7 @@ const validateSignup = (request, response) => {
   if (!request.body.username || !request.body.pass || !request.body.pass2) {
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
@@ -56,8 +56,6 @@ export const login = async (request, response) => {
     );
     return;
   }
-
-  // request.session.account = Account.AccountModel.toAPI(account);
 
   // Create JSON Web Token
   const token = createToken(account._id);
@@ -135,7 +133,7 @@ export const signup = async (request, response) => {
 
 export const logout = async (request, response) => {
   // Decode token for User ID
-  const token = request.headers['x-access-token'];
+  const token = request.headers[Strings.HEADERS.TOKEN];
   const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
   const { id } = decodedToken;
 
@@ -143,7 +141,7 @@ export const logout = async (request, response) => {
   const tokensRemoved = await Account.AccountModel.removeToken(id, token);
   Responses.sendDataResponse(
     response,
-    Strings.RESPONSE_MESSAGE.LOGOUT_SUCCESSFUL,
+    Strings.RESPONSE_MESSAGE.LOGOUT_SUCCESS,
     { removed: tokensRemoved },
   );
   // request.session.destroy();
@@ -151,7 +149,7 @@ export const logout = async (request, response) => {
 };
 
 export const validateToken = async (request, response) => {
-  const token = request.headers['x-access-token'];
+  const token = request.headers[Strings.HEADERS.TOKEN];
   if (!token) {
     Responses.sendGenericErrorResponse(
       response,
@@ -187,6 +185,6 @@ export const validateToken = async (request, response) => {
   }
   Responses.sendGenericSuccessResponse(
     response,
-    'Token authenticated successfully.',
+    Strings.RESPONSE_MESSAGE.TOKEN_AUTH_SUCCESS,
   );
 };

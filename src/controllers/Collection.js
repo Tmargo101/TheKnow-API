@@ -8,18 +8,18 @@ const validateNewCollection = (request, response) => {
   if (!request.body.name || !request.body.owner || !Types.ObjectId.isValid(request.body.owner)) {
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
   return true;
 };
 
-const validateGetAllCollections = (request, response) => {
+const validateGetCollections = (request, response) => {
   if (!request.query.user || !Types.ObjectId.isValid(request.query.user)) {
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
@@ -31,7 +31,7 @@ const validateGetCollection = (request, response) => {
   if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
@@ -85,9 +85,9 @@ export const getCollection = async (request, response) => {
   );
 };
 
-export const getAllCollections = async (request, response) => {
+export const getCollections = async (request, response) => {
   // Validate input
-  const validData = validateGetAllCollections(request, response);
+  const validData = validateGetCollections(request, response);
   if (!validData) { return; }
 
   const collections = await Collection.CollectionModel.findByMember(
@@ -95,7 +95,7 @@ export const getAllCollections = async (request, response) => {
   );
   Responses.sendDataResponse(
     response,
-    Strings.RESPONSE_MESSAGE.COLLECTION_GET_SUCCESS,
+    Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
     { collections },
   );
 };
@@ -131,7 +131,7 @@ export const removeCollection = async (request, response) => {
   // Send response
   Responses.sendDataResponse(
     response,
-    'Deleted Collection',
+    Strings.RESPONSE_MESSAGE.COLLECTION_REMOVE_SUCCESS,
     { deletedCollection },
   );
 };

@@ -20,7 +20,7 @@ const validateNewPlace = (request, response) => {
     // with the request
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
@@ -33,7 +33,7 @@ const validateGetPlace = (request, response) => {
     // with the request
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
@@ -41,16 +41,25 @@ const validateGetPlace = (request, response) => {
   return true;
 };
 
-const validateGetAllPlaces = (request, response) => {
+const validateGetPlaces = (request, response) => {
+  let noAddedBy = false;
+  let noCollection = false;
   if (!request.query.addedBy || !Types.ObjectId.isValid(request.query.addedBy)) {
+    noAddedBy = true;
+  }
+  if (!request.query.collection || !Types.ObjectId.isValid(request.query.collection)) {
+    noCollection = true;
+  }
+  if (noAddedBy && noCollection) {
     // Return a generic error that not all parameters have been included
     // with the request
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
+
   // Valid data
   return true;
 };
@@ -61,7 +70,7 @@ const validateDeletePlace = (request, response) => {
     // with the request
     Responses.sendGenericErrorResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MISSING_REQUIRED_FIELDS,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
     );
     return false;
   }
@@ -86,6 +95,7 @@ const createNewPlaceObject = (request) => {
   const newPlace = new Place.PlaceModel({
     name: request.body.name,
     addedBy: request.body.addedBy,
+    collectionId: request.body.collectionId,
     link: {
       maps: request.body.mapLink,
     },
@@ -143,10 +153,22 @@ export const getPlace = async (request, response) => {
   );
 };
 
-export const getAllPlaces = async (request, response) => {
+export const getPlaces = async (request, response) => {
   // Validate input
-  const validData = validateGetAllPlaces(request, response);
+  const validData = validateGetPlaces(request, response);
   if (!validData) { return; }
+
+  if (request.query.collection) {
+    const places = await Place.PlaceModel.findByCollection(
+      request.query.collection,
+    );
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.COLLECTION_PLACES_GET_SUCCESS,
+      { places },
+    );
+    return;
+  }
 
   // Get place from database
   const places = await Place.PlaceModel.findByOwner(
@@ -156,7 +178,7 @@ export const getAllPlaces = async (request, response) => {
   // Compose response
   Responses.sendDataResponse(
     response,
-    Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
+    Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
     { places },
   );
 };

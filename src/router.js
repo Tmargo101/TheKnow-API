@@ -16,14 +16,14 @@ const router = (app) => {
   app.post('/validate', Account.validateToken);
 
   // Collection routes
-  app.get('/collections', middleware.validateToken, Collection.getAllCollections);
+  app.get('/collections', middleware.validateToken, Collection.getCollections);
   app.get('/collections/:id', middleware.validateToken, Collection.getCollection);
   app.post('/collections', middleware.validateToken, Collection.addCollection);
   app.put('/collections/:id', middleware.validateToken, Collection.updateCollection);
   app.delete('/collections/:id', middleware.validateToken, Collection.removeCollection);
 
   // Place routes
-  app.get('/places', middleware.validateToken, Place.getAllPlaces);
+  app.get('/places', middleware.validateToken, Place.getPlaces);
   app.get('/places/:id', middleware.validateToken, Place.getPlace);
   app.post('/places', middleware.validateToken, Place.addPlace);
   app.put('/places/:id', middleware.validateToken, Place.updatePlace);

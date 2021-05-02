@@ -23,6 +23,11 @@ const PlaceSchema = new Schema({
     // required: true,
     ref: 'Account',
   },
+  collectionId: {
+    type: Schema.ObjectId,
+    // required: true,
+    ref: 'Collection',
+  },
   link: {
     maps: String,
     yelp: String,
@@ -63,6 +68,18 @@ PlaceSchema.statics.findByOwner = async (ownerId) => {
 PlaceSchema.statics.findPlace = async (placeId) => {
   const search = {
     _id: convertId(placeId),
+  };
+
+  const results = await PlaceModel
+    .find(search)
+    .lean()
+    .exec();
+  return results;
+};
+
+PlaceSchema.statics.findByCollection = async (collectionId) => {
+  const search = {
+    collectionId: convertId(collectionId),
   };
 
   const results = await PlaceModel

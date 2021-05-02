@@ -1,6 +1,6 @@
 import { Types, Schema, model } from 'mongoose';
 import { escape } from 'underscore';
-import { PlaceModel } from './Place';
+// import { PlaceModel } from './Place';
 
 // mongoose.Promise = global.Promise;
 
@@ -77,7 +77,6 @@ CollectionSchema.statics.findCollection = async (collectionId) => {
 
   const results = await CollectionModel
     .find(search)
-    .populate('places')
     .lean()
     .exec();
   return results;
