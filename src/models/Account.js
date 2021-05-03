@@ -1,6 +1,6 @@
 import { randomBytes, pbkdf2Sync } from 'crypto';
-import { Schema, model, SchemaTypes } from 'mongoose';
-import {} from 'mongoose-type-email';
+import { Schema, model } from 'mongoose';
+// import {} from 'mongoose-type-email';
 
 let AccountModel = {};
 const iterations = 10000;
@@ -9,7 +9,7 @@ const keyLength = 64;
 
 const AccountSchema = new Schema({
   email: {
-    type: SchemaTypes.Email,
+    type: String,
     required: true,
     unique: true,
   },
