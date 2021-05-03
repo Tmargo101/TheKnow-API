@@ -1,5 +1,6 @@
 import { randomBytes, pbkdf2Sync } from 'crypto';
 import { Schema, model } from 'mongoose';
+// import {} from 'mongoose-type-email';
 
 // Promise = global.Promise;
 
@@ -15,6 +16,20 @@ const AccountSchema = new Schema({
     trim: true,
     unique: true,
     match: /^[A-Za-z0-9_\-.]{1,16}$/,
+  },
+  email: {
+    type: Schema.Email,
+    required: true,
+  },
+  name: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
   },
   salt: {
     type: Buffer,

@@ -8,7 +8,6 @@
   "description": "API Server for The Know",
   "main": "./server/app.js",
   "scripts": {
-
     "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\"",
     "start2": "npm run build && node ./dist/app.js",
@@ -45,6 +44,7 @@
     "express-session": "^1.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.3",
+    "mongoose-type-email": "^1.1.2",
     "redis": "^3.1.2",
     "serve-favicon": "^2.5.0",
     "underscore": "^1.12.1"
