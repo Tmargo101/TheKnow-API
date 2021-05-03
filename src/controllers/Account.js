@@ -125,7 +125,7 @@ export const signup = async (request, response) => {
   newAccount.tokens.push(token);
   await newAccount.save();
 
-  const responseObject = {
+  const user = {
     token,
     id: newAccount._id,
   };
@@ -134,7 +134,7 @@ export const signup = async (request, response) => {
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.SIGNUP_SUCCESS,
-    responseObject,
+    { user },
   );
 };
 
