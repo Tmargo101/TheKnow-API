@@ -28,10 +28,28 @@ const PlaceSchema = new Schema({
     // required: true,
     ref: 'Collection',
   },
-  link: {
-    maps: String,
-    yelp: String,
+  placeData: {
+    address: String,
+    link: String,
+    phoneNumber: String,
+    mapsLink: String,
+    yelpLink: String,
+    coordinates: {
+      latitude: String,
+      longitude: String,
+    },
   },
+  comments: [{
+    comment: {
+      name: String,
+      text: String,
+      userId: {
+        type: Schema.ObjectId,
+        ref: 'Acccount',
+      },
+    },
+  }],
+  note: String,
   reccomendedBy: {
     name: String,
     _id: {
@@ -43,7 +61,6 @@ const PlaceSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  notes: String,
 });
 
 PlaceSchema.statics.toAPI = (doc) => ({
