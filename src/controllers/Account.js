@@ -5,7 +5,7 @@ import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
 const validateLogin = (request, response) => {
-  if (!request.body.username || !request.body.password) {
+  if (!request.body.email || !request.body.password) {
     Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.VALIDATION_FAILED);
     return false;
   }
@@ -13,7 +13,13 @@ const validateLogin = (request, response) => {
 };
 
 const validateSignup = (request, response) => {
-  if (!request.body.username || !request.body.pass || !request.body.pass2) {
+  if (
+    !request.body.email
+    || !request.body.firstname
+    || !request.body.lastname
+    || !request.body.pass
+    || !request.body.pass2
+  ) {
     Responses.sendGenericErrorResponse(
       response,
       Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
@@ -43,11 +49,11 @@ export const login = async (request, response) => {
   const validParams = validateLogin(request, response);
   if (!validParams) { return; }
 
-  const username = `${request.body.username}`;
+  const email = `${request.body.email}`;
   const password = `${request.body.password}`;
 
   // Run authentication with the AccountModel
-  const account = await Account.AccountModel.authenticate(username, password);
+  const account = await Account.AccountModel.authenticate(email, password);
 
   if (account === null) {
     Responses.sendGenericErrorResponse(
@@ -82,7 +88,6 @@ export const signup = async (request, response) => {
   const validParams = validateSignup(request, response);
   if (!validParams) { return; }
 
-  const newUsername = `${request.body.username}`;
   const newPassword = `${request.body.pass}`;
 
   // Generate salt & hash
@@ -90,9 +95,13 @@ export const signup = async (request, response) => {
 
   // Create new account object
   const newAccountData = {
-    username: newUsername,
-    salt: encryptedPassword.salt,
+    email: request.body.email,
+    name: {
+      first: request.body.firstname,
+      last: request.body.lastname,
+    },
     password: encryptedPassword.hash,
+    salt: encryptedPassword.salt,
   };
 
   // convert account
@@ -109,8 +118,6 @@ export const signup = async (request, response) => {
       return;
     }
   } // catch
-
-  request.session.account = Account.AccountModel.toAPI(newAccount);
 
   // Generate new token
   const token = createToken(newAccount._id);

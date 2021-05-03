@@ -1,8 +1,6 @@
 import { randomBytes, pbkdf2Sync } from 'crypto';
-import { Schema, model } from 'mongoose';
-// import {} from 'mongoose-type-email';
-
-// Promise = global.Promise;
+import { Schema, model, SchemaTypes } from 'mongoose';
+import {} from 'mongoose-type-email';
 
 let AccountModel = {};
 const iterations = 10000;
@@ -10,23 +8,17 @@ const saltLength = 64;
 const keyLength = 64;
 
 const AccountSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-    match: /^[A-Za-z0-9_\-.]{1,16}$/,
-  },
   email: {
-    type: Schema.Email,
+    type: SchemaTypes.Email,
     required: true,
+    unique: true,
   },
   name: {
-    firstName: {
+    first: {
       type: String,
       required: true,
     },
-    lastName: {
+    last: {
       type: String,
       required: true,
     },
@@ -66,9 +58,9 @@ const validatePassword = async (doc, password) => {
   return true;
 };
 
-AccountSchema.statics.findByUsername = async (name) => {
+AccountSchema.statics.findByEmail = async (email) => {
   const search = {
-    username: name,
+    email,
   };
 
   const results = await AccountModel.findOne(search).exec();
@@ -84,8 +76,8 @@ AccountSchema.statics.generateHash = async (password) => {
   };
 };
 
-AccountSchema.statics.authenticate = async (username, password) => {
-  const accountDoc = await AccountModel.findByUsername(username);
+AccountSchema.statics.authenticate = async (email, password) => {
+  const accountDoc = await AccountModel.findByEmail(email);
   if (accountDoc === null) {
     return null;
   }
