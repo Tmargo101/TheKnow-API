@@ -29,6 +29,16 @@ export const sendGenericErrorResponse = (response, _message) => {
   return null;
 };
 
+export const sendBadTokenResponse = (response, _message) => {
+  response
+    .status(400)
+    .json({
+      status: Strings.RESPONSE_STATUS.BAD_TOKEN,
+      message: _message,
+    });
+  return null;
+};
+
 export const sendNotFoundResponse = (response, _message) => {
   response
     .status(404)

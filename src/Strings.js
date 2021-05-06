@@ -2,6 +2,7 @@ export const RESPONSE_STATUS = {
   SUCCESS: 'success',
   WARNING: 'warning',
   ERROR: 'error',
+  BAD_TOKEN: 'bad_token',
 };
 
 export const RESPONSE_MESSAGE = {

@@ -7,7 +7,7 @@ import * as Account from '../models/Account';
 export const validateToken = async (request, response, next) => {
   const token = request.headers['x-access-token'];
   if (!token) {
-    Responses.sendGenericErrorResponse(
+    Responses.sendBadTokenResponse(
       response,
       Strings.RESPONSE_MESSAGE.NO_TOKEN_ERROR,
     );
@@ -19,7 +19,8 @@ export const validateToken = async (request, response, next) => {
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
     const idAssociatedWithToken = await Account.AccountModel.verifyToken(token);
 
-    // If the token was associated with the user, and the associated user matches the JWT's userID, continue
+    // If the token was associated with the user, and the associated user matches the JWT's userID,
+    // continue
     if (idAssociatedWithToken !== 0 && idAssociatedWithToken === decodedToken.id) {
       request.userId = decodedToken.id;
       next();
@@ -27,21 +28,21 @@ export const validateToken = async (request, response, next) => {
     }
 
     // If the token wasn't associated with a user account, send an error response
-    Responses.sendGenericErrorResponse(
+    Responses.sendBadTokenResponse(
       response,
       Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
     );
     return;
   } catch (err) {
     console.log(err);
-    Responses.sendGenericErrorResponse(
+    Responses.sendBadTokenResponse(
       response,
       Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
     );
-    return;
+    // return;
   }
 
-  next();
+  // next();
 };
 
 // Ensure a session for the user exists before completing their request

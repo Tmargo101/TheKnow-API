@@ -4,6 +4,16 @@ import * as Account from '../models/Account';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
+const createUserResponseObject = async (token) => {
+  const userData = await Account.AccountModel.findByToken(token);
+  const user = userData.toObject();
+  user.token = token;
+  // eslint-disable-next-line prefer-destructuring
+  user.tokenCount = user.tokens[0];
+  delete user.tokens;
+  return user;
+};
+
 const validateLogin = (request, response) => {
   if (!request.body.email || !request.body.password) {
     Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.VALIDATION_FAILED);
@@ -69,12 +79,9 @@ export const login = async (request, response) => {
   // Save token to account's Tokens array
   account.tokens.push(token);
   await account.save();
+  console.log(account);
 
-  // Create Response object
-  const user = {
-    token,
-    id: account._id,
-  };
+  const user = await createUserResponseObject(token);
 
   // Respond with success message
   Responses.sendDataResponse(
@@ -125,10 +132,11 @@ export const signup = async (request, response) => {
   newAccount.tokens.push(token);
   await newAccount.save();
 
-  const user = {
-    token,
-    id: newAccount._id,
-  };
+  const user = await createUserResponseObject(token);
+  // const user = {
+  //   token,
+  //   id: newAccount._id,
+  // };
 
   // Respond with success message
   Responses.sendDataResponse(
@@ -173,7 +181,7 @@ export const validateToken = async (request, response) => {
     // If the token was associated with the user,
     // and the associated user matches the JWT's userID, continue
     if (idAssociatedWithToken === 0 || idAssociatedWithToken !== decodedToken.id) {
-      Responses.sendGenericErrorResponse(
+      Responses.sendBadTokenResponse(
         response,
         Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
       );
@@ -184,7 +192,7 @@ export const validateToken = async (request, response) => {
     // If the token wasn't associated with a user account, send an error response
   } catch (err) {
     console.log(err);
-    Responses.sendGenericErrorResponse(
+    Responses.sendBadTokenResponse(
       response,
       Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
     );
@@ -194,4 +202,49 @@ export const validateToken = async (request, response) => {
     response,
     Strings.RESPONSE_MESSAGE.TOKEN_AUTH_SUCCESS,
   );
+};
+
+export const getUser = async (request, response) => {
+  const token = request.headers[Strings.HEADERS.TOKEN];
+  if (!token) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.NO_TOKEN_ERROR,
+    );
+    return;
+  }
+
+  try {
+    // Decode the JWT & check if it's assocated with a user in the database
+    const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+    const idAssociatedWithToken = await Account.AccountModel.verifyToken(token);
+
+    // If the token was associated with the user,
+    // and the associated user matches the JWT's userID, continue
+    if (idAssociatedWithToken === 0 || idAssociatedWithToken !== decodedToken.id) {
+      Responses.sendBadTokenResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
+      );
+      return;
+    }
+    request.userId = decodedToken.id;
+
+    const user = await createUserResponseObject(token);
+
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.TOKEN_AUTH_SUCCESS,
+      { user },
+    );
+
+    // If the token wasn't associated with a user account, send an error response
+  } catch (err) {
+    console.log(err);
+    Responses.sendBadTokenResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
+    );
+    // return;
+  }
 };

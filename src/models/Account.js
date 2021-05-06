@@ -67,6 +67,17 @@ AccountSchema.statics.findByEmail = async (email) => {
   return results;
 };
 
+AccountSchema.statics.findByToken = async (token) => {
+  const search = {
+    tokens: token,
+  };
+
+  const results = await AccountModel.findOne(search, 'id email name tokens createdDate').exec();
+  console.log(results);
+  results.tokens = results.tokens.length;
+  return results;
+};
+
 AccountSchema.statics.generateHash = async (password) => {
   const salt = randomBytes(saltLength);
   const hash = pbkdf2Sync(password, salt, iterations, keyLength, 'RSA-SHA512');
