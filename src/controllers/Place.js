@@ -12,9 +12,10 @@ const validateNewPlace = (request, response) => {
   // Validate that all params needed are included
   if (
     !request.body.name
-    || !request.body.mapLink
+    || !request.body.recommendedBy
     || !request.body.addedBy
     || !request.body.collectionId
+    || !request.body.been
   ) {
     // Return a generic error that not all parameters have been included
     // with the request
@@ -96,8 +97,9 @@ const createNewPlaceObject = (request) => {
     name: request.body.name,
     addedBy: request.body.addedBy,
     collectionId: request.body.collectionId,
-    link: {
-      maps: request.body.mapLink,
+    been: request.body.been,
+    recommendedBy: {
+      name: request.body.recommendedBy,
     },
   });
   return newPlace;

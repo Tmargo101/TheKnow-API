@@ -20,13 +20,16 @@ const PlaceSchema = new Schema({
   },
   addedBy: {
     type: Schema.ObjectId,
-    // required: true,
+    required: true,
     ref: 'Account',
   },
   collectionId: {
     type: Schema.ObjectId,
     // required: true,
     ref: 'Collection',
+  },
+  been: {
+    type: Boolean,
   },
   placeData: {
     address: String,
@@ -50,7 +53,7 @@ const PlaceSchema = new Schema({
     },
   }],
   note: String,
-  reccomendedBy: {
+  recommendedBy: {
     name: String,
     _id: {
       type: Schema.ObjectId,
