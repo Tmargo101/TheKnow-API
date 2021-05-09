@@ -10,17 +10,17 @@ let CollectionModel = {};
 const convertId = Types.ObjectId;
 
 // Converts
-const setName = (name) => escape(name).trim();
-
-const getString = (inString) => unescape(inString).trim();
+// const setName = (name) => escape(name).trim();
+//
+// const getString = (inString) => unescape(inString).trim();
 
 const CollectionSchema = new Schema({
   name: {
     type: String,
     required: true,
     trim: true,
-    set: setName,
-    get: getString,
+    // set: setName,
+    // get: getString,
   },
   owner: {
     type: Schema.ObjectId,

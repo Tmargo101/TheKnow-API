@@ -9,17 +9,17 @@ let PlaceModel = {};
 const convertId = Types.ObjectId;
 
 // Converts
-const setName = (name) => escape(name).trim();
-
-const getString = (inString) => unescape(inString).trim();
+// const setName = (name) => escape(name).trim();
+//
+// const getString = (inString) => unescape(inString).trim();
 
 const PlaceSchema = new Schema({
   name: {
     type: String,
     required: true,
     trim: true,
-    set: setName,
-    get: getString,
+    // set: setName,
+    // get: getString,
   },
   addedBy: {
     type: Schema.ObjectId,
