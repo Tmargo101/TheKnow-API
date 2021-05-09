@@ -194,12 +194,24 @@ export const removePlace = async (request, response) => {
   const validData = validateDeletePlace(request, response);
   if (!validData) { return; }
 
+  // Get place
+  const placeToDelete = await Place.PlaceModel.findPlace(request.params.id);
+  console.log(placeToDelete);
+
+  // Remove placeId from collection
+  const placesRemoved = await Collection.CollectionModel.removePlaceFromCollection(
+    placeToDelete[0]._id,
+    placeToDelete[0].collectionId,
+  );
+
+  console.log(`Places removed: ${placesRemoved}`);
+
   // Remove place
   const place = await Place.PlaceModel.deletePlace(request.params.id);
 
   // Create response object
   const deletedPlace = {
-    deleted: place.deletedCount,
+    deletedPlaces: place.deletedCount,
   };
 
   // Send response

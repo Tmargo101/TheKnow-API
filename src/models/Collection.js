@@ -1,6 +1,7 @@
 import { Types, Schema, model } from 'mongoose';
 import mongooseLeanGetters from 'mongoose-lean-getters';
 import { escape, unescape } from 'underscore';
+// import { PlaceModel } from './Place';
 
 let CollectionModel = {};
 
@@ -96,6 +97,25 @@ CollectionSchema.statics.findCollection = async (collectionId) => {
     .exec();
 
   return results;
+};
+
+CollectionSchema.statics.removePlaceFromCollection = async (placeId, collectionId) => {
+  const update = {
+    $pullAll: {
+      places: [placeId],
+    },
+  };
+  console.log(`Remove PlaceID ${placeId} from CollectionID ${collectionId}`);
+  let removedCount = 0;
+  try {
+    const collection = await CollectionModel.findByIdAndUpdate(collectionId, update);
+    if (!collection.places.includes(placeId)) {
+      removedCount = 1;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  return removedCount;
 };
 
 CollectionSchema.statics.deleteCollection = async (collectionId) => {
