@@ -43,7 +43,7 @@ export const addCollection = async (request, response) => {
   // Validate fields, else return
   const validData = validateNewCollection(request, response);
   if (!validData) { return; }
-
+  console.log(request.body);
   // Create new collection object
   const newCollection = new Collection.CollectionModel({
     name: request.body.name,

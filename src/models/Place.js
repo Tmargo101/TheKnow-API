@@ -1,5 +1,5 @@
 import { Types, Schema, model } from 'mongoose';
-import { escape } from 'underscore';
+import { escape, unescape } from 'underscore';
 
 // mongoose.Promise = global.Promise;
 
@@ -11,12 +11,15 @@ const convertId = Types.ObjectId;
 // Converts
 const setName = (name) => escape(name).trim();
 
+const getString = (inString) => unescape(inString).trim();
+
 const PlaceSchema = new Schema({
   name: {
     type: String,
     required: true,
     trim: true,
     set: setName,
+    get: getString,
   },
   addedBy: {
     type: Schema.ObjectId,
@@ -64,7 +67,7 @@ const PlaceSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-});
+}, { toObject: { getters: true }, toJSON: { getters: true } });
 
 PlaceSchema.statics.toAPI = (doc) => ({
   name: doc.name,
