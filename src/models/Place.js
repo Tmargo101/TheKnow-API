@@ -74,21 +74,19 @@ const PlaceSchema = new Schema({
     },
   },
   comments: [{
-    comment: {
-      name: {
-        type: String,
-        set: setString,
-        get: getString,
-      },
-      text: {
-        type: String,
-        set: setString,
-        get: getString,
-      },
-      userId: {
-        type: Schema.ObjectId,
-        ref: 'Acccount',
-      },
+    name: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
+    text: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
+    userId: {
+      type: Schema.ObjectId,
+      ref: 'Acccount',
     },
   }],
   note: {
