@@ -43,7 +43,7 @@ export const addCollection = async (request, response) => {
   // Validate fields, else return
   const validData = validateNewCollection(request, response);
   if (!validData) { return; }
-  console.log(request.body);
+
   // Create new collection object
   const newCollection = new Collection.CollectionModel({
     name: request.body.name,
@@ -93,6 +93,7 @@ export const getCollections = async (request, response) => {
   const collections = await Collection.CollectionModel.findByMember(
     request.query.user,
   );
+
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,

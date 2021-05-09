@@ -1,8 +1,6 @@
 import { Types, Schema, model } from 'mongoose';
+import mongooseLeanGetters from 'mongoose-lean-getters';
 import { escape, unescape } from 'underscore';
-// import { PlaceModel } from './Place';
-
-// mongoose.Promise = global.Promise;
 
 let CollectionModel = {};
 
@@ -10,17 +8,27 @@ let CollectionModel = {};
 const convertId = Types.ObjectId;
 
 // Converts
-// const setName = (name) => escape(name).trim();
-//
-// const getString = (inString) => unescape(inString).trim();
+const setString = (inString) => escape(inString);
+
+const getString = (inString) => {
+  if (inString === undefined) {
+    return undefined;
+  }
+  return unescape(inString);
+};
 
 const CollectionSchema = new Schema({
   name: {
     type: String,
     required: true,
     trim: true,
-    // set: setName,
-    // get: getString,
+    set: setString,
+    get: getString,
+  },
+  description: {
+    type: String,
+    set: setString,
+    get: getString,
   },
   owner: {
     type: Schema.ObjectId,
@@ -40,10 +48,14 @@ const CollectionSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-}, { toObject: { getters: true }, toJSON: { getters: true } });
+});
+
+CollectionSchema.set('toObject', { getters: true });
+CollectionSchema.set('toJSON', { getters: true });
+CollectionSchema.plugin(mongooseLeanGetters);
 
 CollectionSchema.statics.toAPI = (doc) => ({
-  _id: doc._id,
+  id: doc._id,
   name: doc.name,
   owner: doc.owner,
   places: doc.places,
@@ -56,7 +68,7 @@ CollectionSchema.statics.findByOwner = async (ownerId) => {
 
   const results = await CollectionModel
     .find(search)
-    .lean()
+    .lean({ getters: true })
     .exec();
   return results;
 };
@@ -68,7 +80,7 @@ CollectionSchema.statics.findByMember = async (userId) => {
 
   const results = await CollectionModel
     .find(search)
-    .lean()
+    .lean({ getters: true })
     .exec();
   return results;
 };
@@ -80,8 +92,9 @@ CollectionSchema.statics.findCollection = async (collectionId) => {
 
   const results = await CollectionModel
     .find(search)
-    .lean()
+    .lean({ getters: true })
     .exec();
+
   return results;
 };
 

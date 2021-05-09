@@ -1,4 +1,5 @@
 import { Types, Schema, model } from 'mongoose';
+import mongooseLeanGetters from 'mongoose-lean-getters';
 import { escape, unescape } from 'underscore';
 
 // mongoose.Promise = global.Promise;
@@ -9,17 +10,22 @@ let PlaceModel = {};
 const convertId = Types.ObjectId;
 
 // Converts
-// const setName = (name) => escape(name).trim();
-//
-// const getString = (inString) => unescape(inString).trim();
+const setString = (inString) => escape(inString).trim();
+
+const getString = (inString) => {
+  if (inString === undefined) {
+    return undefined;
+  }
+  return unescape(inString);
+};
 
 const PlaceSchema = new Schema({
   name: {
     type: String,
     required: true,
     trim: true,
-    // set: setName,
-    // get: getString,
+    set: setString,
+    get: getString,
   },
   addedBy: {
     type: Schema.ObjectId,
@@ -28,36 +34,74 @@ const PlaceSchema = new Schema({
   },
   collectionId: {
     type: Schema.ObjectId,
-    // required: true,
     ref: 'Collection',
   },
   been: {
     type: Boolean,
   },
   placeData: {
-    address: String,
-    link: String,
-    phoneNumber: String,
-    mapsLink: String,
-    yelpLink: String,
+    address: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
+    link: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
+    phoneNumber: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
+    mapsLink: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
     coordinates: {
-      latitude: String,
-      longitude: String,
+      latitude: {
+        type: String,
+        set: setString,
+        get: getString,
+      },
+      longitude: {
+        type: String,
+        set: setString,
+        get: getString,
+      },
     },
   },
   comments: [{
     comment: {
-      name: String,
-      text: String,
+      name: {
+        type: String,
+        set: setString,
+        get: getString,
+      },
+      text: {
+        type: String,
+        set: setString,
+        get: getString,
+      },
       userId: {
         type: Schema.ObjectId,
         ref: 'Acccount',
       },
     },
   }],
-  note: String,
+  note: {
+    type: String,
+    set: setString,
+    get: getString,
+  },
   recommendedBy: {
-    name: String,
+    name: {
+      type: String,
+      set: setString,
+      get: getString,
+    },
     _id: {
       type: Schema.ObjectId,
       ref: 'Account',
@@ -67,7 +111,11 @@ const PlaceSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-}, { toObject: { getters: true }, toJSON: { getters: true } });
+});
+
+PlaceSchema.set('toObject', { getters: true });
+PlaceSchema.set('toJSON', { getters: true });
+PlaceSchema.plugin(mongooseLeanGetters);
 
 PlaceSchema.statics.toAPI = (doc) => ({
   name: doc.name,
@@ -83,7 +131,7 @@ PlaceSchema.statics.findByOwner = async (ownerId) => {
 
   const results = await PlaceModel
     .find(search)
-    .lean()
+    .lean({ getters: true })
     .exec();
   return results;
 };
@@ -95,7 +143,7 @@ PlaceSchema.statics.findPlace = async (placeId) => {
 
   const results = await PlaceModel
     .find(search)
-    .lean()
+    .lean({ getters: true })
     .exec();
   return results;
 };
@@ -107,7 +155,7 @@ PlaceSchema.statics.findByCollection = async (collectionId) => {
 
   const results = await PlaceModel
     .find(search)
-    .lean()
+    .lean({ getters: true })
     .exec();
   return results;
 };
