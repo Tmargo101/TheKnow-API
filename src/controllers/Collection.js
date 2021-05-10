@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-import { Collection, Place } from '../models';
+import { Collection, Place, Account } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
@@ -134,5 +134,45 @@ export const removeCollection = async (request, response) => {
     response,
     Strings.RESPONSE_MESSAGE.COLLECTION_REMOVE_SUCCESS,
     { deletedCollection },
+  );
+};
+
+const validateAddMemberToCollection = (request, response) => {
+  if (!request.params.id || !request.body.email || !Types.ObjectId.isValid(request.params.id)) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+  return true;
+};
+
+export const addMemberToCollection = async (request, response) => {
+  // Validate that all necessary params exist
+  const validData = validateAddMemberToCollection(request, response);
+  if (!validData) { return; }
+
+  const collection = await Collection.CollectionModel.find({ _id: request.params.id }).exec();
+
+  const member = await Account.AccountModel.find({ email: request.body.email }).exec();
+
+  if (collection[0].members.includes(member[0]._id)) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MEMBER_ALREADY_IN_COLLECTION,
+    );
+    return;
+  }
+
+  // Add new member to the place
+  collection[0].members.push(member[0]._id);
+
+  collection[0].save();
+
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.MEMBER_ADDED_TO_COLLECTION,
+    { collection },
   );
 };

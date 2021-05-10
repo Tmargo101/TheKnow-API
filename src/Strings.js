@@ -34,6 +34,9 @@ export const RESPONSE_MESSAGE = {
   COLLECTION_UPDATE_SUCCESS: 'Collection was updated successfully',
   COLLECTION_REMOVE_SUCCESS: 'Collection was removed successfully',
 
+  MEMBER_ALREADY_IN_COLLECTION: 'Member already in collection',
+  MEMBER_ADDED_TO_COLLECTION: 'Member added to collection',
+
   // Authentication response messages
   LOGIN_SUCCESS: 'Successfully authenticated',
   SIGNUP_SUCCESS: 'Account has been created successfully',
