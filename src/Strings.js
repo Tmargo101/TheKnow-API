@@ -29,6 +29,7 @@ export const RESPONSE_MESSAGE = {
   // Collection response messages
   COLLECTION_GET_SUCCESS: 'Returned collection',
   USER_COLLECTION_GET_SUCCESS: 'Returned all collections the current user is a member of',
+  COLLECTION_MEMBERS_GET_SUCCESS: 'Returned all members of the collection',
 
   COLLECTION_ADD_SUCCESS: 'Collection was added successfully',
   COLLECTION_UPDATE_SUCCESS: 'Collection was updated successfully',

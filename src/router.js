@@ -21,6 +21,7 @@ const router = (app) => {
   app.get('/collections', middleware.validateToken, Collection.getCollections);
   app.get('/collections/:id', middleware.validateToken, Collection.getCollection);
   app.post('/collections', middleware.validateToken, Collection.addCollection);
+  app.get('/collections/:id/members', middleware.validateToken, Collection.getCollectionMembers);
   app.post('/collections/:id/members', middleware.validateToken, Collection.addMemberToCollection);
   // Get members from collection
   app.put('/collections/:id', middleware.validateToken, Collection.updateCollection);

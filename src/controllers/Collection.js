@@ -176,3 +176,20 @@ export const addMemberToCollection = async (request, response) => {
     { collection },
   );
 };
+
+export const getCollectionMembers = async (request, response) => {
+  // Validate input
+  if (!request.params.id) { return; }
+
+  const members = await Collection.CollectionModel
+    .findOne({ _id: request.params.id })
+    .select('members')
+    .populate('members', 'name email')
+    .exec();
+
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.COLLECTION_MEMBERS_GET_SUCCESS,
+    members,
+  );
+};

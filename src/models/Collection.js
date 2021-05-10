@@ -93,6 +93,7 @@ CollectionSchema.statics.findCollection = async (collectionId) => {
 
   const results = await CollectionModel
     .find(search)
+    // .populate('members', 'name email')
     .lean({ getters: true })
     .exec();
 
