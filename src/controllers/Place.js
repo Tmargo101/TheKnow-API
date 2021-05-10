@@ -79,6 +79,24 @@ const validateDeletePlace = (request, response) => {
   return true;
 };
 
+const validateAddComment = (request, response) => {
+  if (!request.params.id
+    || !request.body.commentText
+    || !request.body.commentName
+    || !request.body.userId
+  ) {
+    // Return a generic error that not all parameters have been included
+    // with the request
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+  // Valid data
+  return true;
+};
+
 // Update a collection's "Places" array with a new PlaceID
 const addPlaceToCollection = async (collectionID, placeID) => {
   const parentCollection = await Collection.CollectionModel.findByIdAndUpdate(
@@ -218,6 +236,29 @@ export const getPlaces = async (request, response) => {
 
 export const updatePlace = async (request, response, id) => {
   response.json({ id });
+};
+
+export const addComment = async (request, response) => {
+  // Validate that all necessary params exist
+  const validData = validateAddComment(request, response);
+  if (!validData) { return; }
+
+  const place = await Place.PlaceModel.find({ _id: request.params.id }).exec();
+
+  // Add new comment to the place
+  place[0].comments.push({
+    text: request.body.commentText,
+    name: request.body.commentName,
+    userId: request.body.userId,
+  });
+
+  place[0].save();
+
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.COMMENT_ADD_SUCCESS,
+    { place },
+  );
 };
 
 export const removePlace = async (request, response) => {

@@ -27,6 +27,7 @@ const router = (app) => {
   app.get('/places', middleware.validateToken, Place.getPlaces);
   app.get('/places/:id', middleware.validateToken, Place.getPlace);
   app.post('/places', middleware.validateToken, Place.addPlace);
+  app.post('/places/:id/comments', middleware.validateToken, Place.addComment);
   app.put('/places/:id', middleware.validateToken, Place.updatePlace);
   app.delete('/places/:id', middleware.validateToken, Place.removePlace);
 

@@ -24,6 +24,8 @@ export const RESPONSE_MESSAGE = {
   PLACE_UPDATE_SUCCESS: 'Place was updated successfully',
   PLACE_REMOVE_SUCCESS: 'Place was removed successfully',
 
+  COMMENT_ADD_SUCCESS: 'Comment was added successfully',
+
   // Collection response messages
   COLLECTION_GET_SUCCESS: 'Returned collection',
   USER_COLLECTION_GET_SUCCESS: 'Returned all collections the current user is a member of',
