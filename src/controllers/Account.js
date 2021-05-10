@@ -48,6 +48,30 @@ const validateSignup = (request, response) => {
   return true;
 };
 
+const validateChangePassword = (request, response) => {
+  if (
+    !request.body.oldPass
+    || !request.body.newPass
+    || !request.body.newPass2
+  ) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+
+  if (request.body.newPass !== request.body.newPass2) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PASSWORDS_DONT_MATCH,
+    );
+    return false;
+  }
+  // Valid password change data
+  return true;
+};
+
 const createToken = (userId) => {
   const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: 7776000, // Expires in 90 days
@@ -161,6 +185,49 @@ export const logout = async (request, response) => {
   );
   // request.session.destroy();
   // response.redirect('/');
+};
+
+export const changePassword = async (request, response) => {
+  const validParams = validateChangePassword(request, response);
+  if (!validParams) { return; }
+
+  const token = request.headers['x-access-token'];
+  const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
+
+  const account = await Account.AccountModel.findOne({ _id: decodedToken.id }).exec();
+
+  // const authenticatedAccount = await Account.AccountModel.authenticate(
+  //   account.email,
+  //   request.body.password,
+  // );
+
+  const newPassword = `${request.body.newPass}`;
+
+  // Generate salt & hash
+  const newEncryptedPassword = await Account.AccountModel.generateHash(newPassword);
+
+  account.password = newEncryptedPassword.hash;
+  account.salt = newEncryptedPassword.salt;
+
+  try {
+    await account.save();
+  } catch (err) {
+    if (err.code === 11000) {
+      Responses.sendGenericErrorResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.USERNAME_ALREADY_EXISTS,
+      );
+      return;
+    }
+  } // catch
+
+  const user = account;
+  // Respond with success message
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.SIGNUP_SUCCESS,
+    { user },
+  );
 };
 
 export const validateToken = async (request, response) => {

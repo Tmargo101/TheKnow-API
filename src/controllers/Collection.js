@@ -15,6 +15,17 @@ const validateNewCollection = (request, response) => {
   return true;
 };
 
+const validateAddMemberToCollection = (request, response) => {
+  if (!request.params.id || !request.body.email || !Types.ObjectId.isValid(request.params.id)) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+  return true;
+};
+
 const validateGetCollections = (request, response) => {
   if (!request.query.user || !Types.ObjectId.isValid(request.query.user)) {
     Responses.sendGenericErrorResponse(
@@ -135,17 +146,6 @@ export const removeCollection = async (request, response) => {
     Strings.RESPONSE_MESSAGE.COLLECTION_REMOVE_SUCCESS,
     { deletedCollection },
   );
-};
-
-const validateAddMemberToCollection = (request, response) => {
-  if (!request.params.id || !request.body.email || !Types.ObjectId.isValid(request.params.id)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  return true;
 };
 
 export const addMemberToCollection = async (request, response) => {
