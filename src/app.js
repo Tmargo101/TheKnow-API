@@ -1,7 +1,6 @@
 // const path = require('path');
 // const favicon = require('serve-favicon');
 // const cookieParser = require('cookie-parser');
-// MONGODB_URI=mongodb+srv://tomMargosian:Pmi3sA9QerOP3e4v@cluster0.x98go.mongodb.net/TheKnow?retryWrites=true&w=majority
 
 import express from 'express';
 import compression from 'compression';
