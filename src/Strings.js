@@ -46,6 +46,7 @@ export const RESPONSE_MESSAGE = {
 
   // Authentication error messages
   PASSWORDS_DONT_MATCH: 'Passwords do not match',
+  PASSWORD_NOT_STRONG_ENOUGH: 'Password is not strong enough',
   WRONG_USERNAME_PASSWORD: 'Incorrect username or password',
   USERNAME_ALREADY_EXISTS: 'User already exists in database',
   TOKEN_INVALID_ERROR: 'Token was invalid.  Please try re-logging in',

@@ -22,7 +22,42 @@ const validateLogin = (request, response) => {
   return true;
 };
 
+const passwordIsStrongEnough = (request, response) => {
+  // Ensure password meets complexity requirements
+  if (
+    request.body.pass.length < 6
+  ) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PASSWORD_NOT_STRONG_ENOUGH,
+    );
+    return false;
+  }
+
+  // Password is strong enough
+  return true;
+};
+
+const passwordsMatch = (request, response) => {
+  // Get password from request object
+  const pass = request.body.pass || request.body.newPass;
+  const pass2 = request.body.pass2 || request.body.newPass2;
+
+  // Check if the passwords match
+  if (pass !== pass2) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PASSWORDS_DONT_MATCH,
+    );
+    return false;
+  }
+
+  // Passwords match
+  return true;
+};
+
 const validateSignup = (request, response) => {
+  // Ensure all required data is present
   if (
     !request.body.email
     || !request.body.firstname
@@ -37,18 +72,22 @@ const validateSignup = (request, response) => {
     return false;
   }
 
-  if (request.body.pass !== request.body.pass2) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.PASSWORDS_DONT_MATCH,
-    );
+  // Ensure password is strong enough
+  if (!passwordIsStrongEnough(request, response)) {
     return false;
   }
+
+  // Ensure passwords match
+  if (!passwordsMatch(request, response)) {
+    return false;
+  }
+
   // Valid signup data
   return true;
 };
 
 const validateChangePassword = (request, response) => {
+  // Ensure all required data is present
   if (
     !request.body.oldPass
     || !request.body.newPass
@@ -61,13 +100,11 @@ const validateChangePassword = (request, response) => {
     return false;
   }
 
-  if (request.body.newPass !== request.body.newPass2) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.PASSWORDS_DONT_MATCH,
-    );
+  // Ensure passwords match
+  if (!passwordsMatch(request, response)) {
     return false;
   }
+
   // Valid password change data
   return true;
 };
@@ -157,10 +194,6 @@ export const signup = async (request, response) => {
   await newAccount.save();
 
   const user = await createUserResponseObject(token);
-  // const user = {
-  //   token,
-  //   id: newAccount._id,
-  // };
 
   // Respond with success message
   Responses.sendDataResponse(
