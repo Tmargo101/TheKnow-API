@@ -116,6 +116,18 @@ const validateChangePassword = (request, response) => {
   return true;
 };
 
+const validateForgotPassword = (request, response) => {
+  if (!request.body.email) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+  // Valid forgotPassword data
+  return true;
+};
+
 const createToken = (userId) => {
   const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: 7776000, // Expires in 90 days
@@ -273,6 +285,9 @@ export const changePassword = async (request, response) => {
 };
 
 export const forgotPassword = async (request, response) => {
+  const validParams = validateForgotPassword(request, response);
+  if (!validParams) return;
+
   // Find the account to reset the password for
   const account = await Account.AccountModel.findByEmail(request.body.email);
   if (account === null) {
