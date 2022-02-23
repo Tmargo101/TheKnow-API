@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 import * as Account from '../models/Account';
 import * as Responses from '../utilities/Responses';
@@ -262,6 +263,37 @@ export const changePassword = async (request, response) => {
       return;
     }
   } // catch
+
+  // Respond with success message
+  Responses.sendGenericSuccessResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.CHANGE_PASSWORD_SUCCESS,
+  );
+};
+
+export const forgotPassword = async (request, response) => {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'rb4xlmoym4ktnvka@ethereal.email',
+      pass: 'GZXARDvCQfP5Gxywxh',
+    },
+  });
+
+  // Send mail
+  const info = await transporter.sendMail({
+    from: 'forgot@theknow.io', // sender address
+    to: 'tmargo101@gmail.com', // list of receivers
+    subject: `Forgot your password ${request.body.email}`, // Subject line
+    text: 'Hello', // plain text body
+    html: '<b>Hello world?</b>', // html body
+  });
+
+  console.log('Message sent: %s', info.messageId);
+
+  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
   // Respond with success message
   Responses.sendGenericSuccessResponse(
