@@ -47,12 +47,12 @@ AccountSchema.statics.toAPI = (doc) => ({
   _id: doc._id,
 });
 
-const validatePassword = async (doc, password) => {
-  const pass = doc.password;
+AccountSchema.statics.validatePassword = async (doc, password) => {
+  const accountPassword = doc.password;
 
   const hash = pbkdf2Sync(password, doc.salt, iterations, keyLength, 'RSA-SHA512');
 
-  if (hash.toString('hex') !== pass) {
+  if (hash.toString('hex') !== accountPassword) {
     return false;
   }
   return true;
@@ -73,7 +73,6 @@ AccountSchema.statics.findByToken = async (token) => {
   };
 
   const results = await AccountModel.findOne(search, 'id email name tokens createdDate').exec();
-  console.log(results);
   results.tokens = results.tokens.length;
   return results;
 };
@@ -93,7 +92,7 @@ AccountSchema.statics.authenticate = async (email, password) => {
     return null;
   }
 
-  const validPassword = await validatePassword(accountDoc, password);
+  const validPassword = await AccountModel.validatePassword(accountDoc, password);
 
   if (validPassword) {
     return accountDoc;

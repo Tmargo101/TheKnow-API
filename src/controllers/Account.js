@@ -22,10 +22,10 @@ const validateLogin = (request, response) => {
   return true;
 };
 
-const passwordIsStrongEnough = (request, response) => {
+const passwordIsStrongEnough = (response, password) => {
   // Ensure password meets complexity requirements
   if (
-    request.body.pass.length < 6
+    password.length < 8
   ) {
     Responses.sendGenericErrorResponse(
       response,
@@ -72,13 +72,13 @@ const validateSignup = (request, response) => {
     return false;
   }
 
-  // Ensure password is strong enough
-  if (!passwordIsStrongEnough(request, response)) {
+  // Ensure passwords match
+  if (!passwordsMatch(request, response)) {
     return false;
   }
 
-  // Ensure passwords match
-  if (!passwordsMatch(request, response)) {
+  // Ensure password is strong enough
+  if (!passwordIsStrongEnough(response, request.body.pass)) {
     return false;
   }
 
@@ -105,6 +105,11 @@ const validateChangePassword = (request, response) => {
     return false;
   }
 
+  // Ensure password is strong enough
+  if (!passwordIsStrongEnough(response, request.body.newPass)) {
+    return false;
+  }
+
   // Valid password change data
   return true;
 };
@@ -117,6 +122,7 @@ const createToken = (userId) => {
 };
 
 export const login = async (request, response) => {
+  // Validate all params are present
   const validParams = validateLogin(request, response);
   if (!validParams) { return; }
 
@@ -140,7 +146,7 @@ export const login = async (request, response) => {
   // Save token to account's Tokens array
   account.tokens.push(token);
   await account.save();
-  console.log(account);
+  // console.log(account);
 
   const user = await createUserResponseObject(token);
 
@@ -153,6 +159,7 @@ export const login = async (request, response) => {
 };
 
 export const signup = async (request, response) => {
+  // Validate all params are present
   const validParams = validateSignup(request, response);
   if (!validParams) { return; }
 
@@ -228,12 +235,14 @@ export const changePassword = async (request, response) => {
   const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
 
   const account = await Account.AccountModel.findOne({ _id: decodedToken.id }).exec();
-
-  // const authenticatedAccount = await Account.AccountModel.authenticate(
-  //   account.email,
-  //   request.body.password,
-  // );
-
+  if (await Account.AccountModel.validatePassword(account, request.body.oldPass) === false) {
+    // console.log(`oldPass incorrect for ${decodedToken.id}`);
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PASSWORD_INCORRECT,
+    );
+    return;
+  }
   const newPassword = `${request.body.newPass}`;
 
   // Generate salt & hash
@@ -254,12 +263,10 @@ export const changePassword = async (request, response) => {
     }
   } // catch
 
-  const user = account;
   // Respond with success message
-  Responses.sendDataResponse(
+  Responses.sendGenericSuccessResponse(
     response,
-    Strings.RESPONSE_MESSAGE.SIGNUP_SUCCESS,
-    { user },
+    Strings.RESPONSE_MESSAGE.CHANGE_PASSWORD_SUCCESS,
   );
 };
 
@@ -291,7 +298,7 @@ export const validateToken = async (request, response) => {
 
     // If the token wasn't associated with a user account, send an error response
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     Responses.sendBadTokenResponse(
       response,
       Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
@@ -340,7 +347,7 @@ export const getUser = async (request, response) => {
 
     // If the token wasn't associated with a user account, send an error response
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     Responses.sendBadTokenResponse(
       response,
       Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,

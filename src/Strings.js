@@ -34,18 +34,20 @@ export const RESPONSE_MESSAGE = {
   COLLECTION_ADD_SUCCESS: 'Collection was added successfully',
   COLLECTION_UPDATE_SUCCESS: 'Collection was updated successfully',
   COLLECTION_REMOVE_SUCCESS: 'Collection was removed successfully',
-
+  MEMBER_NOT_FOUND: 'Member not found',
   MEMBER_ALREADY_IN_COLLECTION: 'Member already in collection',
   MEMBER_ADDED_TO_COLLECTION: 'Member added to collection',
 
   // Authentication response messages
   LOGIN_SUCCESS: 'Successfully authenticated',
   SIGNUP_SUCCESS: 'Account has been created successfully',
+  CHANGE_PASSWORD_SUCCESS: 'Password has been changed successfully',
   LOGOUT_SUCCESS: 'Successfully logged out',
-  TOKEN_AUTH_SUCCESS: 'Token authenticated successfully.',
+  TOKEN_AUTH_SUCCESS: 'Token authenticated successfully',
 
   // Authentication error messages
   PASSWORDS_DONT_MATCH: 'Passwords do not match',
+  PASSWORD_INCORRECT: 'Current password is incorrect',
   PASSWORD_NOT_STRONG_ENOUGH: 'Password is not strong enough',
   WRONG_USERNAME_PASSWORD: 'Incorrect username or password',
   USERNAME_ALREADY_EXISTS: 'User already exists in database',
