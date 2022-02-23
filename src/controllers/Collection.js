@@ -156,7 +156,13 @@ export const addMemberToCollection = async (request, response) => {
   const collection = await Collection.CollectionModel.find({ _id: request.params.id }).exec();
 
   const member = await Account.AccountModel.find({ email: request.body.email }).exec();
-
+  if (member !== []) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.MEMBER_NOT_FOUND,
+    );
+    return;
+  }
   if (collection[0].members.includes(member[0]._id)) {
     Responses.sendGenericErrorResponse(
       response,
