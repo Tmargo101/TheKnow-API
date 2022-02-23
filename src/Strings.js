@@ -44,6 +44,7 @@ export const RESPONSE_MESSAGE = {
   CHANGE_PASSWORD_SUCCESS: 'Password has been changed successfully',
   LOGOUT_SUCCESS: 'Successfully logged out',
   TOKEN_AUTH_SUCCESS: 'Token authenticated successfully',
+  FORGOT_PASSWORD_RESPONSE: 'Check your email for further instructions',
 
   // Authentication error messages
   PASSWORDS_DONT_MATCH: 'Passwords do not match',

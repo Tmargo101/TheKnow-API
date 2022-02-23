@@ -1,5 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import cryptoRandomString from 'crypto-random-string';
 
 import * as Account from '../models/Account';
 import * as Responses from '../utilities/Responses';
@@ -272,23 +273,51 @@ export const changePassword = async (request, response) => {
 };
 
 export const forgotPassword = async (request, response) => {
+  // Find the account to reset the password for
+  const account = await Account.AccountModel.findByEmail(request.body.email);
+  if (account === null) {
+    Responses.sendGenericSuccessResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.FORGOT_PASSWORD_RESPONSE,
+    );
+    return;
+  }
+
+  // Reset the password for the account
+  const newPassword = cryptoRandomString(12);
+
+  // Generate salt & hash
+  const newEncryptedPassword = await Account.AccountModel.generateHash(newPassword);
+
+  account.password = newEncryptedPassword.hash;
+  account.salt = newEncryptedPassword.salt;
+
+  try {
+    await account.save();
+  } catch (err) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.NOT_SAVED,
+    );
+  } // catch
+
+  // Send email with temp password
   const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    secure: false,
+    host: process.env.MAIL_SERVER,
+    port: 465,
+    secure: true,
     auth: {
-      user: 'rb4xlmoym4ktnvka@ethereal.email',
-      pass: 'GZXARDvCQfP5Gxywxh',
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
     },
   });
 
   // Send mail
   const info = await transporter.sendMail({
-    from: 'forgot@theknow.io', // sender address
-    to: 'tmargo101@gmail.com', // list of receivers
-    subject: `Forgot your password ${request.body.email}`, // Subject line
-    text: 'Hello', // plain text body
-    html: '<b>Hello world?</b>', // html body
+    from: 'thomas.margosian@gmail.com', // sender address
+    to: request.body.email, // list of receivers
+    subject: 'TheKnow - Forgot Password', // Subject line
+    text: `Hello ${account.email},\nYour new temporary password is: ${newPassword}\nUse this password to login to your account, then follow the steps to reset your password.\nBest,\nTheKnow Team`, // plain text body
   });
 
   console.log('Message sent: %s', info.messageId);
@@ -298,7 +327,7 @@ export const forgotPassword = async (request, response) => {
   // Respond with success message
   Responses.sendGenericSuccessResponse(
     response,
-    Strings.RESPONSE_MESSAGE.CHANGE_PASSWORD_SUCCESS,
+    Strings.RESPONSE_MESSAGE.FORGOT_PASSWORD_RESPONSE,
   );
 };
 
