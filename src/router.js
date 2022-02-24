@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 import * as Home from './controllers/home';
-import * as Account from './controllers/Account';
+import * as Account from './controllers/Account/AccountController';
 import * as Collection from './controllers/Collection';
 import * as Place from './controllers/Place';
 import * as middleware from './middleware';

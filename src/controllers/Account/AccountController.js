@@ -5,142 +5,28 @@ import fs from 'fs';
 import * as path from 'path';
 import * as handlebars from 'handlebars';
 
-import * as Account from '../models/Account';
-import * as Responses from '../utilities/Responses';
-import * as Strings from '../Strings';
+import * as Validators from './AccountValidators';
+import * as Utilities from './AccountUtilityFunctions';
 
-const createUserResponseObject = async (token) => {
-  const userData = await Account.AccountModel.findByToken(token);
-  const user = userData.toObject();
-  user.token = token;
-  // eslint-disable-next-line prefer-destructuring
-  user.tokenCount = user.tokens[0];
-  delete user.tokens;
-  return user;
-};
+import * as Account from '../../models/Account';
+import * as Responses from '../../utilities/Responses';
+import * as Strings from '../../Strings';
 
-const validateLogin = (request, response) => {
-  if (!request.body.email || !request.body.password) {
-    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.VALIDATION_FAILED);
-    return false;
-  }
-  return true;
-};
 
-const passwordIsStrongEnough = (response, password) => {
-  // Ensure password meets complexity requirements
-  if (
-    password.length < 8
-  ) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.PASSWORD_NOT_STRONG_ENOUGH,
-    );
-    return false;
-  }
+/**
+ * Account API Response Methods
+ */
 
-  // Password is strong enough
-  return true;
-};
-
-const passwordsMatch = (request, response) => {
-  // Get password from request object
-  const pass = request.body.pass || request.body.newPass;
-  const pass2 = request.body.pass2 || request.body.newPass2;
-
-  // Check if the passwords match
-  if (pass !== pass2) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.PASSWORDS_DONT_MATCH,
-    );
-    return false;
-  }
-
-  // Passwords match
-  return true;
-};
-
-const validateSignup = (request, response) => {
-  // Ensure all required data is present
-  if (
-    !request.body.email
-    || !request.body.firstname
-    || !request.body.lastname
-    || !request.body.pass
-    || !request.body.pass2
-  ) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-
-  // Ensure passwords match
-  if (!passwordsMatch(request, response)) {
-    return false;
-  }
-
-  // Ensure password is strong enough
-  if (!passwordIsStrongEnough(response, request.body.pass)) {
-    return false;
-  }
-
-  // Valid signup data
-  return true;
-};
-
-const validateChangePassword = (request, response) => {
-  // Ensure all required data is present
-  if (
-    !request.body.oldPass
-    || !request.body.newPass
-    || !request.body.newPass2
-  ) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-
-  // Ensure passwords match
-  if (!passwordsMatch(request, response)) {
-    return false;
-  }
-
-  // Ensure password is strong enough
-  if (!passwordIsStrongEnough(response, request.body.newPass)) {
-    return false;
-  }
-
-  // Valid password change data
-  return true;
-};
-
-const validateForgotPassword = (request, response) => {
-  if (!request.body.email) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid forgotPassword data
-  return true;
-};
-
-const createToken = (userId) => {
-  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: 7776000, // Expires in 90 days
-  });
-  return token;
-};
+/**
+ * Handle requests to the /login endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 
 export const login = async (request, response) => {
   // Validate all params are present
-  const validParams = validateLogin(request, response);
+  const validParams = Validators.validateLogin(request, response);
   if (!validParams) { return; }
 
   const email = `${request.body.email}`;
@@ -158,14 +44,14 @@ export const login = async (request, response) => {
   }
 
   // Create JSON Web Token
-  const token = createToken(account._id);
+  const token = Utilities.createToken(account._id);
 
   // Save token to account's Tokens array
   account.tokens.push(token);
   await account.save();
   // console.log(account);
 
-  const user = await createUserResponseObject(token);
+  const user = await Utilities.createUserResponseObject(token);
 
   // Respond with success message
   Responses.sendDataResponse(
@@ -175,9 +61,16 @@ export const login = async (request, response) => {
   );
 };
 
+/**
+ * Handle requests to the /signup endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
+
 export const signup = async (request, response) => {
   // Validate all params are present
-  const validParams = validateSignup(request, response);
+  const validParams = Validators.validateSignup(request, response);
   if (!validParams) { return; }
 
   const newPassword = `${request.body.pass}`;
@@ -212,12 +105,12 @@ export const signup = async (request, response) => {
   } // catch
 
   // Generate new token
-  const token = createToken(newAccount._id);
+  const token = Utilities.createToken(newAccount._id);
 
   newAccount.tokens.push(token);
   await newAccount.save();
 
-  const user = await createUserResponseObject(token);
+  const user = await Utilities.createUserResponseObject(token);
 
   // Respond with success message
   Responses.sendDataResponse(
@@ -245,7 +138,7 @@ export const logout = async (request, response) => {
 };
 
 export const changePassword = async (request, response) => {
-  const validParams = validateChangePassword(request, response);
+  const validParams = Validators.validateChangePassword(request, response);
   if (!validParams) { return; }
 
   const token = request.headers['x-access-token'];
@@ -288,7 +181,7 @@ export const changePassword = async (request, response) => {
 };
 
 export const forgotPassword = async (request, response) => {
-  const validParams = validateForgotPassword(request, response);
+  const validParams = Validators.validateForgotPassword(request, response);
   if (!validParams) return;
 
   // Find the account to reset the password for
@@ -319,7 +212,7 @@ export const forgotPassword = async (request, response) => {
     );
   } // catch
   const fullName = `${account.name.first} ${account.name.last}`;
-  const filePath = path.join(__dirname, '../email-templates/forgot-password-email.hbs');
+  const filePath = path.join(__dirname, '../../email-templates/forgot-password-email.hbs');
   const source = fs.readFileSync(filePath, 'utf-8').toString();
   const template = handlebars.compile(source);
   const replacements = {
@@ -426,7 +319,7 @@ export const getUser = async (request, response) => {
     }
     request.userId = decodedToken.id;
 
-    const user = await createUserResponseObject(token);
+    const user = await Utilities.createUserResponseObject(token);
 
     Responses.sendDataResponse(
       response,
