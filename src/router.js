@@ -13,6 +13,7 @@ const router = (app) => {
   app.post('/logout', middleware.validateToken, Account.logout);
   app.post('/login', Account.login);
   app.post('/signup', Account.signup);
+  app.post('/forgotPassword', Account.forgotPassword);
   app.post('/validate', Account.validateToken);
   app.get('/user', middleware.validateToken, Account.getUser);
   app.post('/changePassword', middleware.validateToken, Account.changePassword);
