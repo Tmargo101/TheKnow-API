@@ -13,8 +13,8 @@
     "start2": "npm run build && node ./dist/app.js",
     "start": "node ./dist/app.js",
     "nodemon": "nodemon --exec babel-node src/app.js",
-    "build": "babel src -d dist",
-    "heroku-postbuild": "babel src -d dist",
+    "build": "babel src -d dist && cpx \"./src/email-templates/*\" ./dist/email-templates --clean",
+    "heroku-postbuild": "npm run build",
     "heroku-preinstall": "rm -rf /dist",
     "preinstall": "rm -rf /dist"
   },
@@ -39,6 +39,7 @@
     "compression": "^1.7.4",
     "connect-redis": "^5.1.0",
     "cookie-parser": "^1.4.5",
+    "cpx": "^1.5.0",
     "crypto-random-string": "^2.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
