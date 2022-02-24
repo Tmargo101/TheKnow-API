@@ -319,7 +319,7 @@ export const forgotPassword = async (request, response) => {
     );
   } // catch
   const fullName = `${account.name.first} ${account.name.last}`;
-  const filePath = path.join(__dirname, '../forgot-password-email.hbs');
+  const filePath = path.join(__dirname, '../email-templates/forgot-password-email.hbs');
   const source = fs.readFileSync(filePath, 'utf-8').toString();
   const template = handlebars.compile(source);
   const replacements = {
