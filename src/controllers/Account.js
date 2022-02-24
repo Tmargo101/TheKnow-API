@@ -1,6 +1,9 @@
 import * as jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import cryptoRandomString from 'crypto-random-string';
+import fs from 'fs';
+import * as path from 'path';
+import * as handlebars from 'handlebars';
 
 import * as Account from '../models/Account';
 import * as Responses from '../utilities/Responses';
@@ -299,10 +302,10 @@ export const forgotPassword = async (request, response) => {
   }
 
   // Reset the password for the account
-  const newPassword = cryptoRandomString(12);
+  const tempPassword = cryptoRandomString(12);
 
   // Generate salt & hash
-  const newEncryptedPassword = await Account.AccountModel.generateHash(newPassword);
+  const newEncryptedPassword = await Account.AccountModel.generateHash(tempPassword);
 
   account.password = newEncryptedPassword.hash;
   account.salt = newEncryptedPassword.salt;
@@ -315,6 +318,15 @@ export const forgotPassword = async (request, response) => {
       Strings.RESPONSE_MESSAGE.NOT_SAVED,
     );
   } // catch
+  const fullName = `${account.name.first} ${account.name.last}`;
+  const filePath = path.join(__dirname, '../forgot-password-email.hbs');
+  const source = fs.readFileSync(filePath, 'utf-8').toString();
+  const template = handlebars.compile(source);
+  const replacements = {
+    fullName,
+    tempPassword,
+  };
+  const forgotPasswordHtml = template(replacements);
 
   // Send email with temp password
   const transporter = nodemailer.createTransport({
@@ -329,10 +341,11 @@ export const forgotPassword = async (request, response) => {
 
   // Send mail
   const info = await transporter.sendMail({
-    from: 'thomas.margosian@gmail.com', // sender address
+    from: 'no-reply@langslow.site', // sender address
     to: request.body.email, // list of receivers
     subject: 'TheKnow - Forgot Password', // Subject line
-    text: `Hello ${account.email},\nYour new temporary password is: ${newPassword}\nUse this password to login to your account, then follow the steps to reset your password.\nBest,\nTheKnow Team`, // plain text body
+    text: `Hello ${account.email},\nYour new temporary password is: ${tempPassword}\nUse this password to login to your account, then follow the steps to reset your password.\nBest,\nTheKnow Team`, // plain text body
+    html: forgotPasswordHtml,
   });
 
   console.log('Message sent: %s', info.messageId);
