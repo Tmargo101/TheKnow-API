@@ -5,13 +5,12 @@ import fs from 'fs';
 import * as path from 'path';
 import * as handlebars from 'handlebars';
 
-import * as Validators from './AccountValidators';
-import * as Utilities from './AccountUtilityFunctions';
+import * as Validators from './validators/AccountValidators';
+import * as Utilities from './shared/AccountUtilityFunctions';
 
-import * as Account from '../../models/Account';
-import * as Responses from '../../utilities/Responses';
-import * as Strings from '../../Strings';
-
+import * as Account from '../models/Account';
+import * as Responses from '../utilities/Responses';
+import * as Strings from '../Strings';
 
 /**
  * Account API Response Methods

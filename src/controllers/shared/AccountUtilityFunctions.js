@@ -1,5 +1,6 @@
-import * as Account from '../../models/Account';
 import * as jwt from 'jsonwebtoken';
+
+import * as Account from '../../models/Account';
 import * as Responses from '../../utilities/Responses';
 import * as Strings from '../../Strings';
 
@@ -57,4 +58,3 @@ export const passwordIsStrongEnough = (response, password) => {
   // Password is strong enough
   return true;
 };
-

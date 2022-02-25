@@ -1,13 +1,13 @@
 // eslint-disable-next-line import/no-unresolved
-import * as Home from './controllers/home';
-import * as Account from './controllers/Account/AccountController';
-import * as Collection from './controllers/Collection';
-import * as Place from './controllers/Place';
+import * as Home from './controllers/OtherRoutesController';
+import * as Account from './controllers/AccountRoutesController';
+import * as Collection from './controllers/CollectionRoutesController';
+import * as Place from './controllers/PlaceRoutesController';
 import * as middleware from './middleware';
 
 const router = (app) => {
   // API Base
-  app.get('/', Home.home);
+  app.get('/', Home.otherRoutesController);
 
   // Authentication functions
   app.post('/logout', middleware.validateToken, Account.logout);

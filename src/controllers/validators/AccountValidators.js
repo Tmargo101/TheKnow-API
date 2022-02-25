@@ -1,7 +1,6 @@
 import * as Responses from '../../utilities/Responses';
 import * as Strings from '../../Strings';
-import * as AccountUtilities from './AccountUtilityFunctions';
-
+import * as AccountUtilities from '../shared/AccountUtilityFunctions';
 
 export const validateLogin = (request, response) => {
   if (!request.body.email || !request.body.password) {
