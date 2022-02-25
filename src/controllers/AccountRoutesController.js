@@ -22,7 +22,6 @@ import * as Strings from '../Strings';
  * @param response
  * @returns {Promise<void>}
  */
-
 export const login = async (request, response) => {
   // Validate all params are present
   const validParams = Validators.validateLogin(request, response);
@@ -66,7 +65,6 @@ export const login = async (request, response) => {
  * @param response
  * @returns {Promise<void>}
  */
-
 export const signup = async (request, response) => {
   // Validate all params are present
   const validParams = Validators.validateSignup(request, response);
@@ -119,6 +117,12 @@ export const signup = async (request, response) => {
   );
 };
 
+/**
+ * Handle requests to the /logout endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const logout = async (request, response) => {
   // Decode token for User ID
   const token = request.headers[Strings.HEADERS.TOKEN];
@@ -136,6 +140,12 @@ export const logout = async (request, response) => {
   // response.redirect('/');
 };
 
+/**
+ * Handle requests to the /changePassword endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const changePassword = async (request, response) => {
   const validParams = Validators.validateChangePassword(request, response);
   if (!validParams) { return; }
@@ -179,6 +189,12 @@ export const changePassword = async (request, response) => {
   );
 };
 
+/**
+ * Handle requests to the /forgotPassword endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const forgotPassword = async (request, response) => {
   const validParams = Validators.validateForgotPassword(request, response);
   if (!validParams) return;
@@ -251,6 +267,13 @@ export const forgotPassword = async (request, response) => {
   );
 };
 
+// TODO: Ensure this method is necessary
+/**
+ * Handle GET requests to the /validate endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const validateToken = async (request, response) => {
   const token = request.headers[Strings.HEADERS.TOKEN];
   if (!token) {
@@ -292,6 +315,12 @@ export const validateToken = async (request, response) => {
   );
 };
 
+/**
+ * Handle GET requests to the /user
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const getUser = async (request, response) => {
   const token = request.headers[Strings.HEADERS.TOKEN];
   if (!token) {

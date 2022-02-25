@@ -1,58 +1,17 @@
-import { Types } from 'mongoose';
-
+import * as Validators from './validators/CollectionValidators';
 import { Collection, Place, Account } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
-const validateNewCollection = (request, response) => {
-  if (!request.body.name || !request.body.owner || !Types.ObjectId.isValid(request.body.owner)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  return true;
-};
-
-const validateAddMemberToCollection = (request, response) => {
-  if (!request.params.id || !request.body.email || !Types.ObjectId.isValid(request.params.id)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  return true;
-};
-
-const validateGetCollections = (request, response) => {
-  if (!request.query.user || !Types.ObjectId.isValid(request.query.user)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid data
-  return true;
-};
-
-const validateGetCollection = (request, response) => {
-  if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid data
-  return true;
-};
-
+/**
+ * Handle POST requests to the /collections endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const addCollection = async (request, response) => {
   // Validate fields, else return
-  const validData = validateNewCollection(request, response);
+  const validData = Validators.validateAddCollection(request, response);
   if (!validData) { return; }
 
   // Create new collection object
@@ -81,9 +40,15 @@ export const addCollection = async (request, response) => {
   );
 };
 
+/**
+ * Handle GET requests to the /collections/:id
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const getCollection = async (request, response) => {
   // Validate input
-  const validData = validateGetCollection(request, response);
+  const validData = Validators.validateGetCollection(request, response);
   if (!validData) { return; }
 
   const collection = await Collection.CollectionModel.findCollection(
@@ -96,9 +61,15 @@ export const getCollection = async (request, response) => {
   );
 };
 
+/**
+ * Handle GET requests to the /collections endpoint with user queryparam
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const getCollections = async (request, response) => {
   // Validate input
-  const validData = validateGetCollections(request, response);
+  const validData = Validators.validateGetCollections(request, response);
   if (!validData) { return; }
 
   const collections = await Collection.CollectionModel.findByMember(
@@ -112,15 +83,25 @@ export const getCollections = async (request, response) => {
   );
 };
 
+// TODO: Work on this function
+/**
+ * Handle PUT requests
+ * @param request
+ * @param response
+ * @param id
+ * @returns {Promise<void>}
+ */
 export const updateCollection = async (request, response, id) => {
   response.json({ id });
 };
 
+/**
+ * Handle DELETE requests to the /collections/:id endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const removeCollection = async (request, response) => {
-  // Validate Input
-  // const validData = validateDeleteCollection(request, response);
-  // if (!validData) { return; }
-
   // Get the collection object
   const collection = await Collection.CollectionModel.findCollection(request.params.id);
 
@@ -148,9 +129,15 @@ export const removeCollection = async (request, response) => {
   );
 };
 
+/**
+ * Handle POST requests to the /collections/:id/members endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const addMemberToCollection = async (request, response) => {
   // Validate that all necessary params exist
-  const validData = validateAddMemberToCollection(request, response);
+  const validData = Validators.validateAddMemberToCollection(request, response);
   if (!validData) { return; }
 
   const collection = await Collection.CollectionModel.find({ _id: request.params.id }).exec();
@@ -183,6 +170,12 @@ export const addMemberToCollection = async (request, response) => {
   );
 };
 
+/**
+ * Handle GET requests to the /collections/:id/members endpoint
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const getCollectionMembers = async (request, response) => {
   // Validate input
   if (!request.params.id) { return; }

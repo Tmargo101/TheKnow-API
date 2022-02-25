@@ -1,103 +1,16 @@
-import { Types } from 'mongoose';
-
 import { Place, Collection } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
-
-// TODO: Refactor these helper functions / validators to new file?
-
-// Ensure all needed params are present before creating a new place.
-// If any params are not present, respond with an error message
-const validateNewPlace = (request, response) => {
-  // Validate that all params needed are included
-  if (
-    !request.body.name
-    || !request.body.recommendedBy
-    || !request.body.addedBy
-    || !request.body.collectionId
-    || !request.body.been
-  ) {
-    // Return a generic error that not all parameters have been included
-    // with the request
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  return true;
-};
-
-const validateGetPlace = (request, response) => {
-  if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
-    // Return a generic error that not all parameters have been included
-    // with the request
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid data
-  return true;
-};
-
-const validateGetPlaces = (request, response) => {
-  let noAddedBy = false;
-  let noCollection = false;
-  if (!request.query.addedBy || !Types.ObjectId.isValid(request.query.addedBy)) {
-    noAddedBy = true;
-  }
-  if (!request.query.collection || !Types.ObjectId.isValid(request.query.collection)) {
-    noCollection = true;
-  }
-  if (noAddedBy && noCollection) {
-    // Return a generic error that not all parameters have been included
-    // with the request
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-
-  // Valid data
-  return true;
-};
-
-const validateDeletePlace = (request, response) => {
-  if (!request.params.id) {
-    // Return a generic error that not all parameters have been included
-    // with the request
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid data
-  return true;
-};
-
-const validateAddComment = (request, response) => {
-  if (!request.params.id
-    || !request.body.commentText
-    || !request.body.commentName
-    || !request.body.userId
-  ) {
-    // Return a generic error that not all parameters have been included
-    // with the request
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid data
-  return true;
-};
+import * as Validators from './validators/PlaceValidators';
+import * as Utilities from './shared/PlaceUtilityFunctions';
 
 // Update a collection's "Places" array with a new PlaceID
+/**
+ * Adds a place to a collection
+ * @param collectionID
+ * @param placeID
+ * @returns {Promise<*>}
+ */
 const addPlaceToCollection = async (collectionID, placeID) => {
   const parentCollection = await Collection.CollectionModel.findByIdAndUpdate(
     collectionID,
@@ -110,57 +23,19 @@ const addPlaceToCollection = async (collectionID, placeID) => {
   return parentCollection;
 };
 
-const createNewPlaceObject = (request) => {
-  const newPlace = new Place.PlaceModel({
-    name: request.body.name,
-    addedBy: request.body.addedBy,
-    collectionId: request.body.collectionId,
-    been: request.body.been,
-    recommendedBy: {
-      name: request.body.recommendedBy,
-    },
-  });
-
-  // Add comment if added in Place
-  if (request.body.commentText && request.body.commentName) {
-    newPlace.comments.push({
-      text: request.body.commentText,
-      name: request.body.commentName,
-      userId: request.body.addedBy,
-    });
-  }
-
-  // Add address if sent in request
-  if (request.body.address) {
-    newPlace.placeData.address = request.body.address;
-  }
-
-  // Add Phone Number if sent in request
-  if (request.body.phoneNumber) {
-    newPlace.placeData.phoneNumber = request.body.phoneNumber;
-  }
-
-  // Add Website Link if sent in request
-  if (request.body.link) {
-    newPlace.placeData.link = request.body.link;
-  }
-
-  // Add coordinates if sent in request
-  if (request.body.latitude && request.body.longitude) {
-    newPlace.placeData.coordinates.latitude = request.body.latitude;
-    newPlace.placeData.coordinates.longitude = request.body.longitude;
-  }
-
-  return newPlace;
-};
-
+/**
+ * Handles POST requests to /places
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const addPlace = async (request, response) => {
   // Validate database
-  const validData = validateNewPlace(request, response);
+  const validData = Validators.validateNewPlace(request, response);
   if (!validData) { return; }
 
   // Create new place object
-  const newPlace = createNewPlaceObject(request);
+  const newPlace = Utilities.createNewPlaceObject(request);
 
   // Database actions
   try {
@@ -186,9 +61,15 @@ export const addPlace = async (request, response) => {
   );
 };
 
+/**
+ * Handles GET requests to /places/:id
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const getPlace = async (request, response) => {
   // Validate input
-  const validData = validateGetPlace(request, response);
+  const validData = Validators.validateGetPlace(request, response);
   if (!validData) { return; }
 
   // Get place from database
@@ -204,9 +85,15 @@ export const getPlace = async (request, response) => {
   );
 };
 
+/**
+ * Handles GET requests to /places endpoint with query param 'collection'
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const getPlaces = async (request, response) => {
   // Validate input
-  const validData = validateGetPlaces(request, response);
+  const validData = Validators.validateGetPlaces(request, response);
   if (!validData) { return; }
 
   if (request.query.collection) {
@@ -234,13 +121,27 @@ export const getPlaces = async (request, response) => {
   );
 };
 
+// TODO: Work on this function
+/**
+ * Handle PUT requests to the /places/:id endpoint
+ * @param request
+ * @param response
+ * @param id
+ * @returns {Promise<void>}
+ */
 export const updatePlace = async (request, response, id) => {
   response.json({ id });
 };
 
+/**
+ * Handle POST requests to /places/:id/comments
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const addComment = async (request, response) => {
   // Validate that all necessary params exist
-  const validData = validateAddComment(request, response);
+  const validData = Validators.validateAddComment(request, response);
   if (!validData) { return; }
 
   const place = await Place.PlaceModel.find({ _id: request.params.id }).exec();
@@ -261,9 +162,15 @@ export const addComment = async (request, response) => {
   );
 };
 
+/**
+ * Handle DELETE requests to /places/:id
+ * @param request
+ * @param response
+ * @returns {Promise<void>}
+ */
 export const removePlace = async (request, response) => {
   // Validate Input
-  const validData = validateDeletePlace(request, response);
+  const validData = Validators.validateDeletePlace(request, response);
   if (!validData) { return; }
 
   // Get place
