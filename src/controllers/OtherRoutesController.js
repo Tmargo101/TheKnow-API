@@ -1,7 +1,7 @@
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
 
-export const otherRoutesController = async (request, response) => {
+export const apiLive = async (request, response) => {
   Responses.sendGenericSuccessResponse(
     response,
     Strings.RESPONSE_MESSAGE.API_LIVE,

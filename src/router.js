@@ -7,7 +7,7 @@ import * as middleware from './middleware';
 
 const router = (app) => {
   // API Base
-  app.get('/', Home.otherRoutesController);
+  app.get('/', Home.apiLive);
 
   // Authentication functions
   app.post('/logout', middleware.validateToken, Account.logout);
