@@ -321,7 +321,7 @@ export const validateToken = async (request, response) => {
  * @param response
  * @returns {Promise<void>}
  */
-export const getUser = async (request, response) => {
+export const getUserDetails = async (request, response) => {
   const token = request.headers[Strings.HEADERS.TOKEN];
   if (!token) {
     Responses.sendGenericErrorResponse(

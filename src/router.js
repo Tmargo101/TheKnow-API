@@ -15,7 +15,7 @@ const router = (app) => {
   app.post('/signup', Account.signup);
   app.post('/forgotPassword', Account.forgotPassword);
   app.post('/validate', Account.validateToken);
-  app.get('/user', middleware.validateToken, Account.getUser);
+  app.get('/user', middleware.validateToken, Account.getUserDetails);
   app.post('/changePassword', middleware.validateToken, Account.changePassword);
 
   // Collection routes
