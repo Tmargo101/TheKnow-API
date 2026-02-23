@@ -99,6 +99,26 @@ const validateAddComment = (request, response) => {
   return true;
 };
 
+const validateUpdatePlace = (request, response) => {
+  if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+
+  if (request.body.been === undefined || request.body.been === null) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+
+  return true;
+};
+
 // Update a collection's "Places" array with a new PlaceID
 const addPlaceToCollection = async (collectionID, placeID) => {
   const parentCollection = await Collection.CollectionModel.findByIdAndUpdate(
@@ -286,8 +306,28 @@ export const getPlaces = async (request, response) => {
   }
 };
 
-export const updatePlace = async (request, response, id) => {
-  response.json({ id });
+export const updatePlace = async (request, response) => {
+  const validData = validateUpdatePlace(request, response);
+  if (!validData) { return; }
+
+  try {
+    const place = await Place.PlaceModel.find({ _id: request.params.id }).exec();
+    if (!place || place.length === 0) {
+      Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_FOUND);
+      return;
+    }
+
+    place[0].been = request.body.been === true || request.body.been === 'true';
+    await place[0].save();
+
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PLACE_UPDATE_SUCCESS,
+      { place },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const addComment = async (request, response) => {
