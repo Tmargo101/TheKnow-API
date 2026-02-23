@@ -15,6 +15,11 @@ export const RESPONSE_MESSAGE = {
   NOT_SAVED: 'Database returned an error',
   NO_TOKEN_ERROR: 'Please include token with your request',
 
+  // Search response messages
+  PLACE_SEARCH_SUCCESS: 'Returned place search results',
+  PLACE_DETAILS_SUCCESS: 'Returned place details',
+  PLACE_SEARCH_FAILED: 'Failed to fetch results from Google Places',
+
   // Place response messages
   PLACE_GET_SUCCESS: 'Returned place',
   COLLECTION_PLACES_GET_SUCCESS: 'Returned all places in the collection',

@@ -3,6 +3,7 @@ import * as Home from './controllers/home';
 import * as Account from './controllers/Account';
 import * as Collection from './controllers/Collection';
 import * as Place from './controllers/Place';
+import * as Search from './controllers/Search';
 import * as middleware from './middleware';
 
 const router = (app) => {
@@ -35,6 +36,10 @@ const router = (app) => {
   app.post('/places/:id/comments', middleware.validateToken, Place.addComment);
   app.put('/places/:id', middleware.validateToken, Place.updatePlace);
   app.delete('/places/:id', middleware.validateToken, Place.removePlace);
+
+  // Search routes
+  app.get('/search/places', middleware.validateToken, Search.searchPlaces);
+  app.get('/search/places/:googlePlaceId', middleware.validateToken, Search.getPlaceDetails);
 
   // Fallback routes
   app.get('*', Home.notFound);
