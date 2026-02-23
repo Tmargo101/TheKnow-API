@@ -191,17 +191,21 @@ export const getPlace = async (request, response) => {
   const validData = validateGetPlace(request, response);
   if (!validData) { return; }
 
-  // Get place from database
-  const place = await Place.PlaceModel.findPlace(
-    request.params.id,
-  );
+  try {
+    // Get place from database
+    const place = await Place.PlaceModel.findPlace(
+      request.params.id,
+    );
 
-  // Compose response
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
-    { place },
-  );
+    // Compose response
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PLACE_GET_SUCCESS,
+      { place },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const getPlaces = async (request, response) => {
@@ -209,29 +213,33 @@ export const getPlaces = async (request, response) => {
   const validData = validateGetPlaces(request, response);
   if (!validData) { return; }
 
-  if (request.query.collection) {
-    const places = await Place.PlaceModel.findByCollection(
-      request.query.collection,
+  try {
+    if (request.query.collection) {
+      const places = await Place.PlaceModel.findByCollection(
+        request.query.collection,
+      );
+      Responses.sendDataResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.COLLECTION_PLACES_GET_SUCCESS,
+        { places },
+      );
+      return;
+    }
+
+    // Get place from database
+    const places = await Place.PlaceModel.findByOwner(
+      request.query.addedBy,
     );
+
+    // Compose response
     Responses.sendDataResponse(
       response,
-      Strings.RESPONSE_MESSAGE.COLLECTION_PLACES_GET_SUCCESS,
+      Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
       { places },
     );
-    return;
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
   }
-
-  // Get place from database
-  const places = await Place.PlaceModel.findByOwner(
-    request.query.addedBy,
-  );
-
-  // Compose response
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
-    { places },
-  );
 };
 
 export const updatePlace = async (request, response, id) => {
@@ -243,22 +251,26 @@ export const addComment = async (request, response) => {
   const validData = validateAddComment(request, response);
   if (!validData) { return; }
 
-  const place = await Place.PlaceModel.find({ _id: request.params.id }).exec();
+  try {
+    const place = await Place.PlaceModel.find({ _id: request.params.id }).exec();
 
-  // Add new comment to the place
-  place[0].comments.push({
-    text: request.body.commentText,
-    name: request.body.commentName,
-    userId: request.body.userId,
-  });
+    // Add new comment to the place
+    place[0].comments.push({
+      text: request.body.commentText,
+      name: request.body.commentName,
+      userId: request.body.userId,
+    });
 
-  place[0].save();
+    await place[0].save();
 
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.COMMENT_ADD_SUCCESS,
-    { place },
-  );
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.COMMENT_ADD_SUCCESS,
+      { place },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const removePlace = async (request, response) => {
@@ -266,30 +278,31 @@ export const removePlace = async (request, response) => {
   const validData = validateDeletePlace(request, response);
   if (!validData) { return; }
 
-  // Get place
-  const placeToDelete = await Place.PlaceModel.findPlace(request.params.id);
-  console.log(placeToDelete);
+  try {
+    // Get place
+    const placeToDelete = await Place.PlaceModel.findPlace(request.params.id);
 
-  // Remove placeId from collection
-  const placesRemoved = await Collection.CollectionModel.removePlaceFromCollection(
-    placeToDelete[0]._id,
-    placeToDelete[0].collectionId,
-  );
+    // Remove placeId from collection
+    await Collection.CollectionModel.removePlaceFromCollection(
+      placeToDelete[0]._id,
+      placeToDelete[0].collectionId,
+    );
 
-  console.log(`Places removed: ${placesRemoved}`);
+    // Remove place
+    const place = await Place.PlaceModel.deletePlace(request.params.id);
 
-  // Remove place
-  const place = await Place.PlaceModel.deletePlace(request.params.id);
+    // Create response object
+    const deletedPlace = {
+      deletedPlaces: place.deletedCount,
+    };
 
-  // Create response object
-  const deletedPlace = {
-    deletedPlaces: place.deletedCount,
-  };
-
-  // Send response
-  Responses.sendDataResponse(
-    response,
-    'Deleted Place',
-    { deletedPlace },
-  );
+    // Send response
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.PLACE_REMOVE_SUCCESS,
+      { deletedPlace },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };

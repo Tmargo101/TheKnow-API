@@ -4,7 +4,6 @@
 
 import express from 'express';
 import compression from 'compression';
-import { urlencoded } from 'body-parser';
 import { connect } from 'mongoose';
 import router from './router';
 
@@ -20,22 +19,13 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 // Define URL to connect to MongoDB, or add a default
 const dbURL = process.env.MONGODB_URI || 'mongodb://localhost/TheKnowAPI';
 
-// Define options for the connection to MongoDB server
-const mongooseOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-};
-
 // Connect to the MongoDB Database
-connect(dbURL, mongooseOptions, (err) => {
-  if (err) throw err;
-});
+connect(dbURL).catch((err) => { throw err; });
 
 // Use the compression library with express
 app.use(compression());
-app.use(urlencoded({
+app.use(express.json());
+app.use(express.urlencoded({
   extended: true,
 }));
 
