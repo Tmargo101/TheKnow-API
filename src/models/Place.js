@@ -72,6 +72,12 @@ const PlaceSchema = new Schema({
         get: getString,
       },
     },
+    googlePlaceId: { type: String },
+    rating:        { type: Number },
+    reviewCount:   { type: Number },
+    priceLevel:    { type: Number },
+    categories:    { type: [String] },
+    photoUrl:      { type: String },
   },
   comments: [{
     name: {
@@ -108,6 +114,10 @@ const PlaceSchema = new Schema({
   createdDate: {
     type: Date,
     default: Date.now,
+  },
+  placeDataLastRefreshed: {
+    type: Date,
+    default: null,
   },
 });
 

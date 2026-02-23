@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { Place, Collection } from '../models';
 import * as Responses from '../utilities/Responses';
 import * as Strings from '../Strings';
+import * as Search from './Search';
 
 // TODO: Refactor these helper functions / validators to new file?
 
@@ -15,7 +16,8 @@ const validateNewPlace = (request, response) => {
     || !request.body.recommendedBy
     || !request.body.addedBy
     || !request.body.collectionId
-    || !request.body.been
+    || request.body.been === undefined
+    || request.body.been === null
   ) {
     // Return a generic error that not all parameters have been included
     // with the request
@@ -151,6 +153,27 @@ const createNewPlaceObject = (request) => {
     newPlace.placeData.coordinates.longitude = request.body.longitude;
   }
 
+  // Add enriched Google Places data if provided
+  if (request.body.googlePlaceId) {
+    newPlace.placeData.googlePlaceId = request.body.googlePlaceId;
+    newPlace.placeDataLastRefreshed = new Date();
+  }
+  if (request.body.rating) {
+    newPlace.placeData.rating = parseFloat(request.body.rating);
+  }
+  if (request.body.reviewCount) {
+    newPlace.placeData.reviewCount = parseInt(request.body.reviewCount, 10);
+  }
+  if (request.body.priceLevel != null && request.body.priceLevel !== '') {
+    newPlace.placeData.priceLevel = parseInt(request.body.priceLevel, 10);
+  }
+  if (request.body.categories) {
+    newPlace.placeData.categories = JSON.parse(request.body.categories);
+  }
+  if (request.body.photoUrl) {
+    newPlace.placeData.photoUrl = request.body.photoUrl;
+  }
+
   return newPlace;
 };
 
@@ -213,6 +236,25 @@ export const getPlaces = async (request, response) => {
   const validData = validateGetPlaces(request, response);
   if (!validData) { return; }
 
+  const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+
+  const triggerBackgroundRefresh = (places) => {
+    const staleIds = places
+      .filter((p) => p.placeData?.googlePlaceId
+        && (!p.placeDataLastRefreshed
+          || Date.now() - new Date(p.placeDataLastRefreshed) > SEVEN_DAYS))
+      .map((p) => p._id);
+
+    if (staleIds.length > 0) {
+      Place.PlaceModel.find({ _id: { $in: staleIds } })
+        .then((docs) => Promise.allSettled(docs.map(async (doc) => {
+          await Search.refreshPlaceDataFromGoogle(doc);
+          await doc.save();
+        })))
+        .catch((err) => console.error('Background refresh error:', err));
+    }
+  };
+
   try {
     if (request.query.collection) {
       const places = await Place.PlaceModel.findByCollection(
@@ -223,6 +265,7 @@ export const getPlaces = async (request, response) => {
         Strings.RESPONSE_MESSAGE.COLLECTION_PLACES_GET_SUCCESS,
         { places },
       );
+      triggerBackgroundRefresh(places);
       return;
     }
 
@@ -237,6 +280,7 @@ export const getPlaces = async (request, response) => {
       Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
       { places },
     );
+    triggerBackgroundRefresh(places);
   } catch (err) {
     Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
   }
