@@ -5,7 +5,7 @@ import * as Strings from '../Strings';
 import * as Account from '../models/Account';
 
 export const validateToken = async (request, response, next) => {
-  const token = request.headers['x-access-token'];
+  const token = request.cookies?.token || request.headers['x-access-token'];
   if (!token) {
     Responses.sendBadTokenResponse(
       response,

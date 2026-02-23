@@ -1,9 +1,6 @@
-// const path = require('path');
-// const favicon = require('serve-favicon');
-// const cookieParser = require('cookie-parser');
-
 import express from 'express';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import { connect } from 'mongoose';
 import router from './router';
 
@@ -28,8 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({
   extended: true,
 }));
-
-// app.use(cookieParser());
+app.use(cookieParser());
 
 // Use dependency injection to start the router & pass in the express instance.
 router(app);
