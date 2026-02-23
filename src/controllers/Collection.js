@@ -26,17 +26,6 @@ const validateAddMemberToCollection = (request, response) => {
   return true;
 };
 
-const validateGetCollections = (request, response) => {
-  if (!request.query.user || !Types.ObjectId.isValid(request.query.user)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
-    );
-    return false;
-  }
-  // Valid data
-  return true;
-};
 
 const validateGetCollection = (request, response) => {
   if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
@@ -101,14 +90,8 @@ export const getCollection = async (request, response) => {
 };
 
 export const getCollections = async (request, response) => {
-  // Validate input
-  const validData = validateGetCollections(request, response);
-  if (!validData) { return; }
-
   try {
-    const collections = await Collection.CollectionModel.findByMember(
-      request.query.user,
-    );
+    const collections = await Collection.CollectionModel.findByMember(request.userId);
     Responses.sendDataResponse(
       response,
       Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,

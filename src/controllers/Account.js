@@ -12,11 +12,17 @@ import * as Strings from '../Strings';
 const createUserResponseObject = async (token) => {
   const userData = await Account.AccountModel.findByToken(token);
   const user = userData.toObject();
-  user.token = token;
   // eslint-disable-next-line prefer-destructuring
   user.tokenCount = user.tokens[0];
   delete user.tokens;
   return user;
+};
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 7776000 * 1000,
 };
 
 const validateLogin = (request, response) => {
@@ -167,6 +173,8 @@ export const login = async (request, response) => {
 
   const user = await createUserResponseObject(token);
 
+  response.cookie('token', token, cookieOptions);
+
   // Respond with success message
   Responses.sendDataResponse(
     response,
@@ -219,6 +227,8 @@ export const signup = async (request, response) => {
 
   const user = await createUserResponseObject(token);
 
+  response.cookie('token', token, cookieOptions);
+
   // Respond with success message
   Responses.sendDataResponse(
     response,
@@ -229,26 +239,25 @@ export const signup = async (request, response) => {
 
 export const logout = async (request, response) => {
   // Decode token for User ID
-  const token = request.headers[Strings.HEADERS.TOKEN];
+  const token = request.cookies?.token || request.headers[Strings.HEADERS.TOKEN];
   const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
   const { id } = decodedToken;
 
-  // Remove token from
+  // Remove token from account
   const tokensRemoved = await Account.AccountModel.removeToken(id, token);
+  response.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
   Responses.sendDataResponse(
     response,
     Strings.RESPONSE_MESSAGE.LOGOUT_SUCCESS,
     { removed: tokensRemoved },
   );
-  // request.session.destroy();
-  // response.redirect('/');
 };
 
 export const changePassword = async (request, response) => {
   const validParams = validateChangePassword(request, response);
   if (!validParams) { return; }
 
-  const token = request.headers['x-access-token'];
+  const token = request.cookies?.token || request.headers['x-access-token'];
   const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
 
   const account = await Account.AccountModel.findOne({ _id: decodedToken.id }).exec();
@@ -268,6 +277,10 @@ export const changePassword = async (request, response) => {
   account.password = newEncryptedPassword.hash;
   account.salt = newEncryptedPassword.salt;
 
+  // Revoke all existing sessions, issue a fresh token
+  const newToken = createToken(account._id);
+  account.tokens = [newToken];
+
   try {
     await account.save();
   } catch (err) {
@@ -279,6 +292,8 @@ export const changePassword = async (request, response) => {
       return;
     }
   } // catch
+
+  response.cookie('token', newToken, cookieOptions);
 
   // Respond with success message
   Responses.sendGenericSuccessResponse(
@@ -360,7 +375,7 @@ export const forgotPassword = async (request, response) => {
 };
 
 export const validateToken = async (request, response) => {
-  const token = request.headers[Strings.HEADERS.TOKEN];
+  const token = request.cookies?.token || request.headers[Strings.HEADERS.TOKEN];
   if (!token) {
     Responses.sendGenericErrorResponse(
       response,
@@ -401,46 +416,15 @@ export const validateToken = async (request, response) => {
 };
 
 export const getUser = async (request, response) => {
-  const token = request.headers[Strings.HEADERS.TOKEN];
+  const token = request.cookies?.token || request.headers[Strings.HEADERS.TOKEN];
   if (!token) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.NO_TOKEN_ERROR,
-    );
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NO_TOKEN_ERROR);
     return;
   }
-
   try {
-    // Decode the JWT & check if it's assocated with a user in the database
-    const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-    const idAssociatedWithToken = await Account.AccountModel.verifyToken(token);
-
-    // If the token was associated with the user,
-    // and the associated user matches the JWT's userID, continue
-    if (idAssociatedWithToken === 0 || idAssociatedWithToken !== decodedToken.id) {
-      Responses.sendBadTokenResponse(
-        response,
-        Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
-      );
-      return;
-    }
-    request.userId = decodedToken.id;
-
     const user = await createUserResponseObject(token);
-
-    Responses.sendDataResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.TOKEN_AUTH_SUCCESS,
-      { user },
-    );
-
-    // If the token wasn't associated with a user account, send an error response
+    Responses.sendDataResponse(response, Strings.RESPONSE_MESSAGE.TOKEN_AUTH_SUCCESS, { user });
   } catch (err) {
-    // console.log(err);
-    Responses.sendBadTokenResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR,
-    );
-    // return;
+    Responses.sendBadTokenResponse(response, Strings.RESPONSE_MESSAGE.TOKEN_INVALID_ERROR);
   }
 };
