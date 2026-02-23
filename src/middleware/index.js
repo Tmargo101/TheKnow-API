@@ -63,7 +63,7 @@ export const requiresLogout = (request, response, next) => {
 // If this function is added to a router request, all http requests will be
 // converted to HTTPS requests to ensure transport security if the NODE_ENV var is set to production
 export const requiresSecure = (request, response, next) => {
-  if (!process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV !== 'production') {
     return next();
   }
 

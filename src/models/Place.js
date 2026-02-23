@@ -7,7 +7,7 @@ import { escape, unescape } from 'underscore';
 let PlaceModel = {};
 
 // Converts a string of an ID to a mongoose ID
-const convertId = Types.ObjectId;
+const convertId = (id) => new Types.ObjectId(id);
 
 // Converts
 const setString = (inString) => escape(inString).trim();
@@ -86,7 +86,7 @@ const PlaceSchema = new Schema({
     },
     userId: {
       type: Schema.ObjectId,
-      ref: 'Acccount',
+      ref: 'Account',
     },
   }],
   note: {

@@ -6,7 +6,7 @@ import { escape, unescape } from 'underscore';
 let CollectionModel = {};
 
 // Converts a string of an ID to a mongoose ID
-const convertId = Types.ObjectId;
+const convertId = (id) => new Types.ObjectId(id);
 
 // Converts
 const setString = (inString) => escape(inString);

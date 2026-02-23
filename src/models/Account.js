@@ -12,6 +12,7 @@ const AccountSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    match: [/^\S+@\S+\.\S+$/, 'Invalid email address'],
   },
   name: {
     first: {

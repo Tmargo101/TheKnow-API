@@ -86,14 +86,18 @@ export const getCollection = async (request, response) => {
   const validData = validateGetCollection(request, response);
   if (!validData) { return; }
 
-  const collection = await Collection.CollectionModel.findCollection(
-    request.params.id,
-  );
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.COLLECTION_GET_SUCCESS,
-    { collection },
-  );
+  try {
+    const collection = await Collection.CollectionModel.findCollection(
+      request.params.id,
+    );
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.COLLECTION_GET_SUCCESS,
+      { collection },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const getCollections = async (request, response) => {
@@ -101,15 +105,18 @@ export const getCollections = async (request, response) => {
   const validData = validateGetCollections(request, response);
   if (!validData) { return; }
 
-  const collections = await Collection.CollectionModel.findByMember(
-    request.query.user,
-  );
-
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
-    { collections },
-  );
+  try {
+    const collections = await Collection.CollectionModel.findByMember(
+      request.query.user,
+    );
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.USER_COLLECTION_GET_SUCCESS,
+      { collections },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const updateCollection = async (request, response, id) => {
@@ -117,35 +124,35 @@ export const updateCollection = async (request, response, id) => {
 };
 
 export const removeCollection = async (request, response) => {
-  // Validate Input
-  // const validData = validateDeleteCollection(request, response);
-  // if (!validData) { return; }
+  try {
+    // Get the collection object
+    const collection = await Collection.CollectionModel.findCollection(request.params.id);
 
-  // Get the collection object
-  const collection = await Collection.CollectionModel.findCollection(request.params.id);
+    let count = 0;
+    // Remove all places in the collection
+    collection[0].places.forEach(async (place) => {
+      await Place.PlaceModel.deletePlace(place._id);
+      count += 1;
+    });
 
-  let count = 0;
-  // Remove all places in the collection
-  collection[0].places.forEach(async (place) => {
-    await Place.PlaceModel.deletePlace(place._id);
-    count += 1;
-  });
+    // Remove the collection
+    const deleteCollection = await Collection.CollectionModel.deleteCollection(request.params.id);
 
-  // Remove the collection
-  const deleteCollection = await Collection.CollectionModel.deleteCollection(request.params.id);
+    // Create response object
+    const deletedCollection = {
+      deletedPlaces: count,
+      deleted: deleteCollection.deletedCount,
+    };
 
-  // Create response object
-  const deletedCollection = {
-    deletedPlaces: count,
-    deleted: deleteCollection.deletedCount,
-  };
-
-  // Send response
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.COLLECTION_REMOVE_SUCCESS,
-    { deletedCollection },
-  );
+    // Send response
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.COLLECTION_REMOVE_SUCCESS,
+      { deletedCollection },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const addMemberToCollection = async (request, response) => {
@@ -153,49 +160,57 @@ export const addMemberToCollection = async (request, response) => {
   const validData = validateAddMemberToCollection(request, response);
   if (!validData) { return; }
 
-  const collection = await Collection.CollectionModel.find({ _id: request.params.id }).exec();
+  try {
+    const collection = await Collection.CollectionModel.find({ _id: request.params.id }).exec();
 
-  const member = await Account.AccountModel.find({ email: request.body.email }).exec();
-  if (member !== []) {
-    Responses.sendGenericErrorResponse(
+    const member = await Account.AccountModel.find({ email: request.body.email }).exec();
+    if (member !== []) {
+      Responses.sendGenericErrorResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.MEMBER_NOT_FOUND,
+      );
+      return;
+    }
+    if (collection[0].members.includes(member[0]._id)) {
+      Responses.sendGenericErrorResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.MEMBER_ALREADY_IN_COLLECTION,
+      );
+      return;
+    }
+
+    // Add new member to the place
+    collection[0].members.push(member[0]._id);
+
+    await collection[0].save();
+
+    Responses.sendDataResponse(
       response,
-      Strings.RESPONSE_MESSAGE.MEMBER_NOT_FOUND,
+      Strings.RESPONSE_MESSAGE.MEMBER_ADDED_TO_COLLECTION,
+      { collection },
     );
-    return;
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
   }
-  if (collection[0].members.includes(member[0]._id)) {
-    Responses.sendGenericErrorResponse(
-      response,
-      Strings.RESPONSE_MESSAGE.MEMBER_ALREADY_IN_COLLECTION,
-    );
-    return;
-  }
-
-  // Add new member to the place
-  collection[0].members.push(member[0]._id);
-
-  collection[0].save();
-
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.MEMBER_ADDED_TO_COLLECTION,
-    { collection },
-  );
 };
 
 export const getCollectionMembers = async (request, response) => {
   // Validate input
   if (!request.params.id) { return; }
 
-  const members = await Collection.CollectionModel
-    .findOne({ _id: request.params.id })
-    .select('members')
-    .populate('members', 'name email')
-    .exec();
+  try {
+    const members = await Collection.CollectionModel
+      .findOne({ _id: request.params.id })
+      .select('members')
+      .populate('members', 'name email')
+      .exec();
 
-  Responses.sendDataResponse(
-    response,
-    Strings.RESPONSE_MESSAGE.COLLECTION_MEMBERS_GET_SUCCESS,
-    members,
-  );
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.COLLECTION_MEMBERS_GET_SUCCESS,
+      members,
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
