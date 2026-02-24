@@ -39,6 +39,26 @@ const validateGetCollection = (request, response) => {
   return true;
 };
 
+const validateUpdateCollection = (request, response) => {
+  if (!request.params.id || !Types.ObjectId.isValid(request.params.id)) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+
+  if (!request.body.name || request.body.name.trim().length === 0) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+    );
+    return false;
+  }
+
+  return true;
+};
+
 export const addCollection = async (request, response) => {
   // Validate fields, else return
   const validData = validateNewCollection(request, response);
@@ -102,8 +122,39 @@ export const getCollections = async (request, response) => {
   }
 };
 
-export const updateCollection = async (request, response, id) => {
-  response.json({ id });
+export const updateCollection = async (request, response) => {
+  const validData = validateUpdateCollection(request, response);
+  if (!validData) { return; }
+
+  try {
+    const collection = await Collection.CollectionModel.findById(request.params.id).exec();
+    if (!collection) {
+      Responses.sendNotFoundResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.NOT_FOUND,
+      );
+      return;
+    }
+
+    if (collection.owner.toString() !== request.userId) {
+      Responses.sendGenericErrorResponse(
+        response,
+        Strings.RESPONSE_MESSAGE.VALIDATION_FAILED,
+      );
+      return;
+    }
+
+    collection.name = request.body.name.trim();
+    await collection.save();
+
+    Responses.sendDataResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.COLLECTION_UPDATE_SUCCESS,
+      { collection },
+    );
+  } catch (err) {
+    Responses.sendGenericErrorResponse(response, Strings.RESPONSE_MESSAGE.NOT_SAVED);
+  }
 };
 
 export const removeCollection = async (request, response) => {
