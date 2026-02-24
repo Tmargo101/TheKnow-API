@@ -48,6 +48,7 @@ export const RESPONSE_MESSAGE = {
   SIGNUP_SUCCESS: 'Account has been created successfully',
   CHANGE_PASSWORD_SUCCESS: 'Password has been changed successfully',
   LOGOUT_SUCCESS: 'Successfully logged out',
+  LOGOUT_OTHER_SESSIONS_SUCCESS: 'Successfully logged out of other sessions',
   TOKEN_AUTH_SUCCESS: 'Token authenticated successfully',
   FORGOT_PASSWORD_RESPONSE: 'Check your email for further instructions',
 

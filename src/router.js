@@ -12,6 +12,7 @@ const router = (app) => {
 
   // Authentication functions
   app.post('/logout', middleware.validateToken, Account.logout);
+  app.post('/logoutOtherSessions', middleware.validateToken, Account.logoutOtherSessions);
   app.post('/login', Account.login);
   app.post('/signup', Account.signup);
   app.post('/forgotPassword', Account.forgotPassword);
