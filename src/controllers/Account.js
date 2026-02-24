@@ -253,6 +253,35 @@ export const logout = async (request, response) => {
   );
 };
 
+export const logoutOtherSessions = async (request, response) => {
+  const account = await Account.AccountModel.findOne({ _id: request.userId }).exec();
+
+  if (!account) {
+    Responses.sendGenericErrorResponse(
+      response,
+      Strings.RESPONSE_MESSAGE.NOT_FOUND,
+    );
+    return;
+  }
+
+  const previousTokenCount = account.tokens.length;
+  const newToken = createToken(account._id);
+  account.tokens = [newToken];
+
+  await account.save();
+
+  response.cookie('token', newToken, cookieOptions);
+
+  Responses.sendDataResponse(
+    response,
+    Strings.RESPONSE_MESSAGE.LOGOUT_OTHER_SESSIONS_SUCCESS,
+    {
+      removed: Math.max(previousTokenCount - 1, 0),
+      tokenCount: 1,
+    },
+  );
+};
+
 export const changePassword = async (request, response) => {
   const validParams = validateChangePassword(request, response);
   if (!validParams) { return; }
